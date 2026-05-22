@@ -20,7 +20,7 @@ import javax.net.ssl.KeyManagerFactory;
 @RequiredArgsConstructor
 public class WebClientConfig {
 
-    private final BBApiProperties config;
+    private final BBApiProperties properties;
 
     @Bean
     public WebClient bbWebClient() throws Exception {
@@ -28,12 +28,12 @@ public class WebClientConfig {
         KeyStore keyStore = KeyStore.getInstance("PKCS12");
 
         InputStream keyStoreStream =
-                new ClassPathResource(config.getSslCertPath())
+                new ClassPathResource(properties.getSslCertPath())
                         .getInputStream();
 
         keyStore.load(
                 keyStoreStream,
-                config.getSslCertPassword().toCharArray()
+                properties.getSslCertPassword().toCharArray()
         );
 
         KeyManagerFactory kmf =
@@ -43,7 +43,7 @@ public class WebClientConfig {
 
         kmf.init(
                 keyStore,
-                config.getSslCertPassword().toCharArray()
+                properties.getSslCertPassword().toCharArray()
         );
 
         SslContext sslContext = SslContextBuilder

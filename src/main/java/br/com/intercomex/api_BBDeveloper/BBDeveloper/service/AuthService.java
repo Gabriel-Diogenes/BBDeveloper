@@ -15,14 +15,14 @@ import java.util.Base64;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final BBApiProperties config;
+    private final BBApiProperties properties;
 
     private final WebClient bbWebClient;
 
     public TokenResponseDTO gerarToken() {
 
         String credentials =
-                config.getClientId() + ":" + config.getClientSecret();
+                properties.getClientId() + ":" + properties.getClientSecret();
 
         String base64Credentials =
                 Base64.getEncoder()
@@ -32,7 +32,7 @@ public class AuthService {
 
         return bbWebClient
                 .post()
-                .uri(config.getOauthUrl())
+                .uri(properties.getOauthUrl())
 
                 .header(
                         "Authorization",
@@ -41,7 +41,7 @@ public class AuthService {
 
                 .header(
                         "gw-dev-app-key",
-                        config.getDeveloperKey()
+                        properties.getDeveloperKey()
                 )
 
                 .contentType(
@@ -56,7 +56,7 @@ public class AuthService {
                                 )
                                 .with(
                                         "scope",
-                                        config.getScope()
+                                        properties.getScope()
                                 )
                 )
 
