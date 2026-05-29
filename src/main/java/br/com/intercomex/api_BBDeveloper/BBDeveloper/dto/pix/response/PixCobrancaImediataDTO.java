@@ -1,9 +1,10 @@
-package br.com.intercomex.api_BBDeveloper.BBDeveloper.dto;
+package br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.pix.response;
 
+import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.pix.request.PixCobrancaRequestDTO;
 import lombok.Data;
 
 @Data
-public class PixCobrancaImediata {
+public class PixCobrancaImediataDTO {
 
     private String txid;
     private String revisao;

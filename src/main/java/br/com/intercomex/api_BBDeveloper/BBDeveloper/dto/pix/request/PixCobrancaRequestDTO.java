@@ -1,4 +1,4 @@
-package br.com.intercomex.api_BBDeveloper.BBDeveloper.dto;
+package br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.pix.request;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
@@ -10,8 +10,8 @@ import java.util.List;
 
 @Data
 @Builder
-@NoArgsConstructor          // ← adicionar
-@AllArgsConstructor         // ← adicionar (exigido pelo @Builder)
+@NoArgsConstructor          
+@AllArgsConstructor         
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PixCobrancaRequestDTO {
 

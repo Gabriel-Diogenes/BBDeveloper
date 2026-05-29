@@ -1,40 +1,58 @@
 package br.com.intercomex.api_BBDeveloper.BBDeveloper.service;
 
-import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.PixCobrancaRequestDTO;
-import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.PixCobrancaImediata;
-import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.TokenResponseDTO;
+import br.com.intercomex.api_BBDeveloper.BBDeveloper.client.BBApiClient;
+import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.auth.TokenResponseDTO;
+import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.pix.response.PixCobrancaImediataDTO;
+import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.pix.request.PixCobrancaRequestDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.properties.BBApiProperties;
+import br.com.intercomex.api_BBDeveloper.BBDeveloper.util.PixUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
-import java.util.UUID;
-
+/**
+ * Service de Pix.
+ * 
+ * Responsável por regras de negócio relacionadas a Pix.
+ * Delega chamadas HTTP para o BBApiClient.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class PixService {
 
     private final BBApiProperties properties;
-    private final WebClient bbWebClient;
+    private final BBApiClient bbApiClient;
     private final AuthService authService;
 
-    public PixCobrancaImediata criarCobranca() {
-
+    /**
+     * Cria uma cobrança Pix imediata.
+     * 
+     * Fluxo:
+     * 1. Obtém token de autenticação
+     * 2. Gera TXID único
+     * 3. Monta requisição Pix
+     * 4. Envia ao BB Developer
+     * 
+     * @return PixCobrancaImediata com dados da cobrança criada
+     * @throws IllegalStateException se falhar na autenticação
+     */
+    public PixCobrancaImediataDTO criarCobranca() {
+        log.debug("Iniciando fluxo de criação de cobrança Pix");
+        
+        // 1. Autentica
         TokenResponseDTO token = authService.gerarToken();
-
+        
         if (token == null || token.getAccess_token() == null) {
+            log.error("Falha crítica: não foi possível obter token para criar cobrança");
             throw new IllegalStateException("Falha ao obter token de acesso");
         }
 
-        String txid = UUID.randomUUID()
-                .toString()
-                .replace("-", "");
+        // 2. Gera TXID único
+        String txid = PixUtil.gerarTxid();
+        log.debug("TXID gerado: {}", txid);
 
+        // 3. Monta requisição
         PixCobrancaRequestDTO request = PixCobrancaRequestDTO.builder()
                 .calendario(
                         PixCobrancaRequestDTO.Calendario.builder()
@@ -52,54 +70,11 @@ public class PixService {
                                 .original("1.00")
                                 .build()
                 )
-
-
                 .chave(properties.getPixKey())
-
                 .solicitacaoPagador("Pagamento de teste Pix")
                 .build();
 
-        log.info("Criando cobrança Pix — txid: {}", txid);
-        log.info("Payload enviado ao BB: {}", request);
-
-        return bbWebClient
-                .put()
-                .uri(
-                        properties.getPixBaseUrl()
-                                + "/cob/"
-                                + txid
-                                + "?gw-dev-app-key="
-                                + properties.getDeveloperKey()
-                )
-                .header("Authorization", "Bearer " + token.getAccess_token())
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(request)
-
-                .retrieve()
-
-                .onStatus(
-                        HttpStatusCode::isError,
-                        response -> response.bodyToMono(String.class)
-                                .flatMap(body -> {
-
-                                    log.error("Erro retornado pelo BB:");
-                                    log.error("Status: {}", response.statusCode());
-                                    log.error("Body: {}", body);
-
-                                    return Mono.error(
-                                            new RuntimeException(
-                                                    "Erro BB API: " + body
-                                            )
-                                    );
-                                })
-                )
-
-                .bodyToMono(PixCobrancaImediata.class)
-
-                .doOnSuccess(response ->
-                        log.info("Cobrança criada com sucesso: {}", response)
-                )
-
-                .block();
+        // 4. Envia ao cliente HTTP
+        return bbApiClient.criarCobrancaPix(txid, request, token.getAccess_token());
     }
 }

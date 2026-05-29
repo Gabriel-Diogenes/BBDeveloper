@@ -1,4 +1,4 @@
-package br.com.intercomex.api_BBDeveloper.BBDeveloper.dto;
+package br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.auth;
 
 import lombok.Data;
 
