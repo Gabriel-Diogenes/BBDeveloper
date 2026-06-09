@@ -1,0 +1,429 @@
+{
+  "info": {
+    "_postman_id": "bbdeveloper-pix-collection",
+    "name": "BB Developer - PIX (Cob e CobV)",
+    "description": "Collection para testar a API local BBDeveloper.\n\nA aplicação Spring obtém o token OAuth2 + mTLS internamente — não é necessário enviar Authorization nas requisições.\n\n**Regras do BB:**\n- `txid`: 26 a 35 caracteres alfanuméricos [a-zA-Z0-9]\n- Listagem: intervalo entre `inicio` e `fim` deve ser menor que 5 dias\n\n**Variáveis da collection:**\n- `baseUrl` — URL da aplicação (padrão: http://localhost:8080)\n- `pixKey` — chave PIX cadastrada no BB (mesmo valor de `bb.pix-key`)\n- `txid` / `txidCobv` — gerados automaticamente se inválidos\n- `inicio` / `fim` — período de listagem (máx. 4 dias)\n\n**Ordem sugerida de testes:**\n1. Teste rápido (POST /pix/cobrancas)\n2. Criar Cob (PUT /pix/cob/{txid})\n3. Consultar Cob\n4. Criar CobV (PUT /pix/cobv/{txid})\n5. Consultar CobV",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "pixKey",
+      "value": "hmtestes2@bb.com.br"
+    },
+    {
+      "key": "txid",
+      "value": ""
+    },
+    {
+      "key": "txidCobv",
+      "value": ""
+    },
+    {
+      "key": "inicio",
+      "value": "2026-06-05T00:00:00Z"
+    },
+    {
+      "key": "fim",
+      "value": "2026-06-08T23:59:59Z"
+    }
+  ],
+  "item": [
+    {
+      "name": "Autenticação",
+      "item": [
+        {
+          "name": "Gerar Token (teste direto)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/token",
+              "host": ["{{baseUrl}}"],
+              "path": ["token"]
+            },
+            "description": "Opcional. Testa a geração de token OAuth2 diretamente. Os endpoints PIX não precisam deste token — a aplicação gera internamente."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Teste Rápido",
+      "item": [
+        {
+          "name": "Criar Cobrança (dados fixos)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const body = pm.response.json();",
+                  "    if (body.txid) {",
+                  "        pm.collectionVariables.set('txid', body.txid);",
+                  "        console.log('txid salvo:', body.txid);",
+                  "    }",
+                  "    pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "    pm.test('Possui pixCopiaECola', () => pm.expect(body.pixCopiaECola).to.be.a('string').and.not.empty);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pix/cobrancas",
+              "host": ["{{baseUrl}}"],
+              "path": ["pix", "cobrancas"]
+            },
+            "description": "Endpoint original de teste. Cria uma Cob com dados hardcoded no PixService — valida autenticação e integração com o BB."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cob (Cobrança Imediata)",
+      "item": [
+        {
+          "name": "Criar Cob (PUT com txid)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const txidAtual = pm.collectionVariables.get('txid');",
+                  "const txidValido = txidAtual && /^[a-zA-Z0-9]{26,35}$/.test(txidAtual);",
+                  "if (!txidValido) {",
+                  "    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';",
+                  "    let txid = '';",
+                  "    for (let i = 0; i < 32; i++) {",
+                  "        txid += chars.charAt(Math.floor(Math.random() * chars.length));",
+                  "    }",
+                  "    pm.collectionVariables.set('txid', txid);",
+                  "    console.log('txid gerado:', txid);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const body = pm.response.json();",
+                  "    if (body.txid) pm.collectionVariables.set('txid', body.txid);",
+                  "    pm.test('Cob criada', () => pm.response.to.have.status(200));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"calendario\": {\n    \"expiracao\": 3600\n  },\n  \"devedor\": {\n    \"cpf\": \"12345678909\",\n    \"nome\": \"Francisco da Silva\"\n  },\n  \"valor\": {\n    \"original\": \"1.00\"\n  },\n  \"chave\": \"{{pixKey}}\",\n  \"solicitacaoPagador\": \"Pagamento de teste Pix\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pix/cob/{{txid}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["pix", "cob", "{{txid}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar Cob sem txid (POST)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const body = pm.response.json();",
+                  "    if (body.txid) pm.collectionVariables.set('txid', body.txid);",
+                  "    pm.test('Cob criada', () => pm.response.to.have.status(201));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"calendario\": {\n    \"expiracao\": 3600\n  },\n  \"devedor\": {\n    \"cpf\": \"12345678909\",\n    \"nome\": \"Francisco da Silva\"\n  },\n  \"valor\": {\n    \"original\": \"1.00\"\n  },\n  \"chave\": \"{{pixKey}}\",\n  \"solicitacaoPagador\": \"Pagamento de teste Pix\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pix/cob",
+              "host": ["{{baseUrl}}"],
+              "path": ["pix", "cob"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Consultar Cob",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pix/cob/{{txid}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["pix", "cob", "{{txid}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Revisar Cob",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"valor\": {\n    \"original\": \"2.00\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pix/cob/{{txid}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["pix", "cob", "{{txid}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Cobs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pix/cob?inicio={{inicio}}&fim={{fim}}&paginaAtual=0&itensPorPagina=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["pix", "cob"],
+              "query": [
+                { "key": "inicio", "value": "{{inicio}}" },
+                { "key": "fim", "value": "{{fim}}" },
+                { "key": "cpf", "value": "12345678909", "disabled": true },
+                { "key": "cnpj", "value": "", "disabled": true },
+                { "key": "status", "value": "ATIVA", "disabled": true },
+                { "key": "paginaAtual", "value": "0" },
+                { "key": "itensPorPagina", "value": "10" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancelar Cob",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pix/cob/{{txid}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["pix", "cob", "{{txid}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "CobV (Cobrança com Vencimento)",
+      "item": [
+        {
+          "name": "Criar CobV (PUT com txid)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const txidAtual = pm.collectionVariables.get('txidCobv');",
+                  "const txidValido = txidAtual && /^[a-zA-Z0-9]{26,35}$/.test(txidAtual);",
+                  "if (!txidValido) {",
+                  "    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';",
+                  "    let txid = '';",
+                  "    for (let i = 0; i < 32; i++) {",
+                  "        txid += chars.charAt(Math.floor(Math.random() * chars.length));",
+                  "    }",
+                  "    pm.collectionVariables.set('txidCobv', txid);",
+                  "    console.log('txidCobv gerado:', txid);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const body = pm.response.json();",
+                  "    if (body.txid) pm.collectionVariables.set('txidCobv', body.txid);",
+                  "    pm.test('CobV criada', () => pm.response.to.have.status(200));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"calendario\": {\n    \"dataDeVencimento\": \"2026-07-15\",\n    \"validadeAposVencimento\": 30\n  },\n  \"devedor\": {\n    \"cpf\": \"12345678909\",\n    \"nome\": \"Francisco da Silva\",\n    \"logradouro\": \"Rua Exemplo, 100\",\n    \"cidade\": \"Brasilia\",\n    \"uf\": \"DF\",\n    \"cep\": \"70040912\"\n  },\n  \"valor\": {\n    \"original\": \"10.00\"\n  },\n  \"chave\": \"{{pixKey}}\",\n  \"solicitacaoPagador\": \"Pagamento de servico prestado\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pix/cobv/{{txidCobv}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["pix", "cobv", "{{txidCobv}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar CobV sem txid (POST)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const body = pm.response.json();",
+                  "    if (body.txid) pm.collectionVariables.set('txidCobv', body.txid);",
+                  "    pm.test('CobV criada', () => pm.response.to.have.status(201));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"calendario\": {\n    \"dataDeVencimento\": \"2026-07-15\",\n    \"validadeAposVencimento\": 30\n  },\n  \"devedor\": {\n    \"cpf\": \"12345678909\",\n    \"nome\": \"Francisco da Silva\",\n    \"logradouro\": \"Rua Exemplo, 100\",\n    \"cidade\": \"Brasilia\",\n    \"uf\": \"DF\",\n    \"cep\": \"70040912\"\n  },\n  \"valor\": {\n    \"original\": \"10.00\"\n  },\n  \"chave\": \"{{pixKey}}\",\n  \"solicitacaoPagador\": \"Pagamento de servico prestado\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pix/cobv",
+              "host": ["{{baseUrl}}"],
+              "path": ["pix", "cobv"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Consultar CobV",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pix/cobv/{{txidCobv}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["pix", "cobv", "{{txidCobv}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Revisar CobV",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"valor\": {\n    \"original\": \"15.00\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pix/cobv/{{txidCobv}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["pix", "cobv", "{{txidCobv}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar CobVs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pix/cobv?inicio={{inicio}}&fim={{fim}}&paginaAtual=0&itensPorPagina=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["pix", "cobv"],
+              "query": [
+                { "key": "inicio", "value": "{{inicio}}" },
+                { "key": "fim", "value": "{{fim}}" },
+                { "key": "cpf", "value": "12345678909", "disabled": true },
+                { "key": "cnpj", "value": "", "disabled": true },
+                { "key": "status", "value": "ATIVA", "disabled": true },
+                { "key": "paginaAtual", "value": "0" },
+                { "key": "itensPorPagina", "value": "10" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancelar CobV",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pix/cobv/{{txidCobv}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["pix", "cobv", "{{txidCobv}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

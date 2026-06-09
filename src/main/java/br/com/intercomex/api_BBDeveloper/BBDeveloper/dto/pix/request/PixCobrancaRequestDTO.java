@@ -21,6 +21,8 @@ public class PixCobrancaRequestDTO {
     private String chave;
     private String solicitacaoPagador;
     private List<InfoAdicional> infoAdicionais;
+    private Loc loc;
+    private String status;
 
     @Data
     @Builder
@@ -55,5 +57,13 @@ public class PixCobrancaRequestDTO {
     public static class InfoAdicional {
         private String nome;
         private String valor;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Loc {
+        private Long id;
     }
 }

@@ -12,20 +12,13 @@ import org.springframework.stereotype.Component;
 public class BBApiProperties {
 
     private String clientId;
-
     private String clientSecret;
-
     private String developerKey;
-
     private String oauthUrl;
-
     private String pixBaseUrl;
-
+    private String cobrancaBaseUrl;
     private String scope;
-
     private String sslCertPath;
-
     private String sslCertPassword;
-
     private String pixKey;
 }
