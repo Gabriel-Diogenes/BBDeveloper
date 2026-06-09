@@ -1,67 +1,38 @@
 package br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.request;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class BoletoRegistrarRequestDTO {
-
-    private Integer numeroConvenio;
-
-    private Integer numeroCarteira;
-
-    private Integer numeroVariacaoCarteira;
-
-    private Integer codigoModalidade;
-
-    private String dataEmissao;
-
-    private String dataVencimento;
-
-    private Double valorOriginal;
-
-    private String indicadorAceiteTituloVencido;
-
-    private String codigoAceite;
-
-    private Integer codigoTipoTitulo;
-
-    private String descricaoTipoTitulo;
-
-    private String indicadorPermissaoRecebimentoParcial;
-
-    private String numeroTituloBeneficiario;
-
-    private String campoUtilizacaoBeneficiario;
-
-    private String numeroTituloCliente;
-
-    private String mensagemBloquetoOcorrencia;
-
-    private String indicadorPix;
-
-    private Pagador pagador;
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Pagador {
-        private Integer tipoInscricao;
-        private String numeroInscricao;
-        private String nome;
-        private String endereco;
-        private String cep;
-        private String cidade;
-        private String bairro;
-        private String uf;
-        private String telefone;
+public record BoletoRegistrarRequestDTO(
+        Integer numeroConvenio,
+        Integer numeroCarteira,
+        Integer numeroVariacaoCarteira,
+        Integer codigoModalidade,
+        String dataEmissao,
+        String dataVencimento,
+        Double valorOriginal,
+        String indicadorAceiteTituloVencido,
+        String codigoAceite,
+        Integer codigoTipoTitulo,
+        String descricaoTipoTitulo,
+        String indicadorPermissaoRecebimentoParcial,
+        String numeroTituloBeneficiario,
+        String campoUtilizacaoBeneficiario,
+        String numeroTituloCliente,
+        String mensagemBloquetoOcorrencia,
+        String indicadorPix,
+        Pagador pagador
+) {
+    public record Pagador(
+            Integer tipoInscricao,
+            String numeroInscricao,
+            String nome,
+            String endereco,
+            String cep,
+            String cidade,
+            String bairro,
+            String uf,
+            String telefone
+    ) {
     }
 }

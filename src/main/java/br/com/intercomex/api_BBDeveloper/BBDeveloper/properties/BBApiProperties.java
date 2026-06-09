@@ -17,6 +17,8 @@ public class BBApiProperties {
     private String oauthUrl;
     private String pixBaseUrl;
     private String cobrancaBaseUrl;
+    private String extratoBaseUrl;
+    private String extratoHomologacaoHeader;
     private String scope;
     private String sslCertPath;
     private String sslCertPassword;

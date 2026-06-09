@@ -1,69 +1,32 @@
 package br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.pix.request;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-@Data
-@Builder
-@NoArgsConstructor          
-@AllArgsConstructor         
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PixCobrancaRequestDTO {
-
-    private Calendario calendario;
-    private Devedor devedor;
-    private Valor valor;
-    private String chave;
-    private String solicitacaoPagador;
-    private List<InfoAdicional> infoAdicionais;
-    private Loc loc;
-    private String status;
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Calendario {
-        private Integer expiracao;
+public record PixCobrancaRequestDTO(
+        Calendario calendario,
+        Devedor devedor,
+        Valor valor,
+        String chave,
+        String solicitacaoPagador,
+        List<InfoAdicional> infoAdicionais,
+        Loc loc,
+        String status
+) {
+    public record Calendario(Integer expiracao) {
     }
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Devedor {
-        private String cpf;
-        private String cnpj;
-        private String nome;
+    public record Devedor(String cpf, String cnpj, String nome) {
     }
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Valor {
-        private String original;
+    public record Valor(String original) {
     }
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class InfoAdicional {
-        private String nome;
-        private String valor;
+    public record InfoAdicional(String nome, String valor) {
     }
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Loc {
-        private Long id;
+    public record Loc(Long id) {
     }
 }

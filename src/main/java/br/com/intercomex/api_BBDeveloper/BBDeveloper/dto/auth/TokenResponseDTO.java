@@ -1,15 +1,19 @@
 package br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.auth;
 
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@Data
-public class TokenResponseDTO {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public record TokenResponseDTO(
+        @JsonProperty("access_token") String accessToken,
+        @JsonProperty("token_type") String tokenType,
+        @JsonProperty("expires_in") Integer expiresIn,
+        String scope
+) {
 
-    private String access_token;
-
-    private String token_type;
-
-    private Integer expires_in;
-
-    private String scope;
+    @Override
+    @JsonProperty("expires_in")
+    public Integer expiresIn() {
+        return expiresIn;
+    }
 }

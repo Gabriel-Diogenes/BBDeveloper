@@ -1,124 +1,62 @@
 package br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.pix.request;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PixCobvRequestDTO {
-
-    private Calendario calendario;
-    private Devedor devedor;
-    private Valor valor;
-    private String chave;
-    private String solicitacaoPagador;
-    private List<InfoAdicional> infoAdicionais;
-    private Loc loc;
-    private String status;
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Calendario {
-        private String dataDeVencimento;
-        private Integer validadeAposVencimento;
+public record PixCobvRequestDTO(
+        Calendario calendario,
+        Devedor devedor,
+        Valor valor,
+        String chave,
+        String solicitacaoPagador,
+        List<InfoAdicional> infoAdicionais,
+        Loc loc,
+        String status
+) {
+    public record Calendario(String dataDeVencimento, Integer validadeAposVencimento) {
     }
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Devedor {
-        private String cpf;
-        private String cnpj;
-        private String nome;
-        private String email;
-        private String logradouro;
-        private String cidade;
-        private String uf;
-        private String cep;
+    public record Devedor(
+            String cpf,
+            String cnpj,
+            String nome,
+            String email,
+            String logradouro,
+            String cidade,
+            String uf,
+            String cep
+    ) {
     }
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Valor {
-        private String original;
-        private Multa multa;
-        private Juros juros;
-        private Desconto desconto;
-        private Abatimento abatimento;
+    public record Valor(
+            String original,
+            Multa multa,
+            Juros juros,
+            Desconto desconto,
+            Abatimento abatimento
+    ) {
     }
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Multa {
-        private Integer modalidade;
-        private String valorPerc;
+    public record Multa(Integer modalidade, String valorPerc) {
     }
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Juros {
-        private Integer modalidade;
-        private String valorPerc;
+    public record Juros(Integer modalidade, String valorPerc) {
     }
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Desconto {
-        private Integer modalidade;
-        private List<DescontoDataFixa> descontoDataFixa;
+    public record Desconto(Integer modalidade, List<DescontoDataFixa> descontoDataFixa) {
     }
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class DescontoDataFixa {
-        private String data;
-        private String valorPerc;
+    public record DescontoDataFixa(String data, String valorPerc) {
     }
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Abatimento {
-        private Integer modalidade;
-        private String valorPerc;
+    public record Abatimento(Integer modalidade, String valorPerc) {
     }
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class InfoAdicional {
-        private String nome;
-        private String valor;
+    public record InfoAdicional(String nome, String valor) {
     }
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Loc {
-        private Long id;
+    public record Loc(Long id) {
     }
 }

@@ -19,11 +19,6 @@ public class PixController {
 
     private final PixService pixService;
 
-    @PostMapping("/cobrancas")
-    public ResponseEntity<PixCobrancaImediataDTO> criarCobrancaTeste() {
-        return ResponseEntity.ok(pixService.criarCobranca());
-    }
-
     @PutMapping("/cob/{txid}")
     public ResponseEntity<PixCobrancaImediataDTO> criarCob(
             @PathVariable String txid,
