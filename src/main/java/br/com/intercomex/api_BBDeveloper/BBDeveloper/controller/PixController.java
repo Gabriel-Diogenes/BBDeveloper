@@ -44,11 +44,6 @@ public class PixController {
         return ResponseEntity.ok(pixService.revisarCob(txid, request));
     }
 
-    @DeleteMapping("/cob/{txid}")
-    public ResponseEntity<PixCobrancaImediataDTO> cancelarCob(@PathVariable String txid) {
-        return ResponseEntity.ok(pixService.cancelarCob(txid));
-    }
-
     @GetMapping("/cob")
     public ResponseEntity<PixCobListaResponseDTO> listarCobs(
             @RequestParam(required = false) String inicio,
@@ -69,12 +64,6 @@ public class PixController {
         return ResponseEntity.ok(pixService.criarCobv(txid, request));
     }
 
-    @PostMapping("/cobv")
-    public ResponseEntity<PixCobvResponseDTO> criarCobvSemTxid(
-            @RequestBody PixCobvRequestDTO request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(pixService.criarCobvSemTxid(request));
-    }
-
     @GetMapping("/cobv/{txid}")
     public ResponseEntity<PixCobvResponseDTO> consultarCobv(@PathVariable String txid) {
         return ResponseEntity.ok(pixService.consultarCobv(txid));
@@ -85,11 +74,6 @@ public class PixController {
             @PathVariable String txid,
             @RequestBody PixCobvRequestDTO request) {
         return ResponseEntity.ok(pixService.revisarCobv(txid, request));
-    }
-
-    @DeleteMapping("/cobv/{txid}")
-    public ResponseEntity<PixCobvResponseDTO> cancelarCobv(@PathVariable String txid) {
-        return ResponseEntity.ok(pixService.cancelarCobv(txid));
     }
 
     @GetMapping("/cobv")

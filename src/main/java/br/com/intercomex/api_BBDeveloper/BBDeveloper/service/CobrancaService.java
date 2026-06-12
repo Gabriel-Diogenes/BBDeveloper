@@ -26,13 +26,16 @@ public class CobrancaService {
     private static final int CAMPO_UTILIZACAO_BENEFICIARIO_MAX_LENGTH = 25;
     private static final String CAMPO_UTILIZACAO_BENEFICIARIO_PADRAO = "SERVICO PRESTADO";
 
-    public BoletoListaResponseDTO listarBoletos(Integer numeroConvenio) {
-        log.debug("Listando boletos do convênio: {}", numeroConvenio);
+    public BoletoListaResponseDTO listarBoletos(
+            Integer numeroConvenio, String agenciaBeneficiario, String contaBeneficiario) {
+        log.debug("Listando boletos do convênio: {} (agência: {}, conta: {})",
+                numeroConvenio, agenciaBeneficiario, contaBeneficiario);
 
         String dataInicio = LocalDate.now().minusDays(30).format(DATA_FORMATTER);
         String dataFim = LocalDate.now().plusDays(30).format(DATA_FORMATTER);
 
-        return cobrancaApiClient.listarBoletos(bearer(), numeroConvenio, dataInicio, dataFim);
+        return cobrancaApiClient.listarBoletos(
+                bearer(), numeroConvenio, agenciaBeneficiario, contaBeneficiario, dataInicio, dataFim);
     }
 
     public BoletoResponseDTO registrarBoleto(
@@ -48,8 +51,9 @@ public class CobrancaService {
         String dataHoje = LocalDate.now().format(DATA_FORMATTER);
         String dataVencimento = LocalDate.now().plusDays(diasVencimento).format(DATA_FORMATTER);
 
-        // Nosso número: 14 dígitos numéricos únicos
-        String numeroTituloCliente = String.format("%014d", System.currentTimeMillis() % 100000000000000L);
+        // Nosso número (numeroTituloCliente): 20 dígitos = "000" + convênio (7) + sequencial (10)
+        long sequencial = System.currentTimeMillis() % 10000000000L;
+        String numeroTituloCliente = String.format("000%07d%010d", numeroConvenio, sequencial);
 
         // Define tipo de inscrição: CPF = 1, CNPJ = 2
         int tipoInscricao = cpfCnpjPagador.replaceAll("\\D", "").length() <= 11 ? 1 : 2;
@@ -88,19 +92,19 @@ public class CobrancaService {
         return cobrancaApiClient.registrarBoleto(bearer(), request);
     }
 
-    public BoletoPixResponseDTO consultarPixBoleto(String numeroBoleto) {
-        log.debug("Consultando Pix do boleto: {}", numeroBoleto);
-        return cobrancaApiClient.consultarPixBoleto(bearer(), numeroBoleto);
+    public BoletoPixResponseDTO consultarPixBoleto(String numeroBoleto, Integer numeroConvenio) {
+        log.debug("Consultando Pix do boleto: {} (convênio: {})", numeroBoleto, numeroConvenio);
+        return cobrancaApiClient.consultarPixBoleto(bearer(), numeroBoleto, numeroConvenio);
     }
 
-    public BoletoPixResponseDTO gerarPixBoleto(String numeroBoleto) {
-        log.debug("Gerando Pix para boleto: {}", numeroBoleto);
-        return cobrancaApiClient.gerarPixBoleto(bearer(), numeroBoleto);
+    public BoletoPixResponseDTO gerarPixBoleto(String numeroBoleto, Integer numeroConvenio) {
+        log.debug("Gerando Pix para boleto: {} (convênio: {})", numeroBoleto, numeroConvenio);
+        return cobrancaApiClient.gerarPixBoleto(bearer(), numeroBoleto, numeroConvenio);
     }
 
-    public void cancelarPixBoleto(String numeroBoleto) {
-        log.debug("Cancelando Pix do boleto: {}", numeroBoleto);
-        cobrancaApiClient.cancelarPixBoleto(bearer(), numeroBoleto);
+    public void cancelarPixBoleto(String numeroBoleto, Integer numeroConvenio) {
+        log.debug("Cancelando Pix do boleto: {} (convênio: {})", numeroBoleto, numeroConvenio);
+        cobrancaApiClient.cancelarPixBoleto(bearer(), numeroBoleto, numeroConvenio);
     }
 
     private String bearer() {

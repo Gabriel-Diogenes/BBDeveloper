@@ -23,4 +23,5 @@ public class BBApiProperties {
     private String sslCertPath;
     private String sslCertPassword;
     private String pixKey;
+    private boolean wiretapEnabled;
 }

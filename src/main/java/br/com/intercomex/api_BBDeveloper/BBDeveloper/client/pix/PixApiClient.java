@@ -122,20 +122,6 @@ public class PixApiClient extends BBClientSupport {
                 .block();
     }
 
-    public PixCobvResponseDTO criarCobvSemTxid(PixCobvRequestDTO request, String token) {
-        log.info("Criando cobrança Pix (CobV) sem txid");
-        return bbWebClient.post()
-                .uri(pixUri("/cobv"))
-                .header("Authorization", "Bearer " + token)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(request)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, errorHandler(API, "criar cobrança CobV sem txid"))
-                .bodyToMono(PixCobvResponseDTO.class)
-                .doOnSuccess(r -> log.info("CobV criada: txid={}, status={}", r.txid(), r.status()))
-                .block();
-    }
-
     public PixCobvResponseDTO consultarCobv(String txid, String token) {
         log.info("Consultando cobrança Pix (CobV) — txid: {}", txid);
         return bbWebClient.get()

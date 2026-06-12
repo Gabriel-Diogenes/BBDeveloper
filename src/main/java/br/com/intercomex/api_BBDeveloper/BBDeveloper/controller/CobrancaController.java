@@ -17,8 +17,11 @@ public class CobrancaController {
 
     @GetMapping("/boletos")
     public ResponseEntity<BoletoListaResponseDTO> listarBoletos(
-            @RequestParam Integer numeroConvenio) {
-        return ResponseEntity.ok(cobrancaService.listarBoletos(numeroConvenio));
+            @RequestParam Integer numeroConvenio,
+            @RequestParam String agenciaBeneficiario,
+            @RequestParam String contaBeneficiario) {
+        return ResponseEntity.ok(
+                cobrancaService.listarBoletos(numeroConvenio, agenciaBeneficiario, contaBeneficiario));
     }
 
     @PostMapping("/boletos")
@@ -35,20 +38,23 @@ public class CobrancaController {
 
     @GetMapping("/boletos/{numeroBoleto}/pix")
     public ResponseEntity<BoletoPixResponseDTO> consultarPixBoleto(
-            @PathVariable String numeroBoleto) {
-        return ResponseEntity.ok(cobrancaService.consultarPixBoleto(numeroBoleto));
+            @PathVariable String numeroBoleto,
+            @RequestParam Integer numeroConvenio) {
+        return ResponseEntity.ok(cobrancaService.consultarPixBoleto(numeroBoleto, numeroConvenio));
     }
 
     @PostMapping("/boletos/{numeroBoleto}/pix")
     public ResponseEntity<BoletoPixResponseDTO> gerarPixBoleto(
-            @PathVariable String numeroBoleto) {
-        return ResponseEntity.ok(cobrancaService.gerarPixBoleto(numeroBoleto));
+            @PathVariable String numeroBoleto,
+            @RequestParam Integer numeroConvenio) {
+        return ResponseEntity.ok(cobrancaService.gerarPixBoleto(numeroBoleto, numeroConvenio));
     }
 
     @DeleteMapping("/boletos/{numeroBoleto}/pix")
     public ResponseEntity<Void> cancelarPixBoleto(
-            @PathVariable String numeroBoleto) {
-        cobrancaService.cancelarPixBoleto(numeroBoleto);
+            @PathVariable String numeroBoleto,
+            @RequestParam Integer numeroConvenio) {
+        cobrancaService.cancelarPixBoleto(numeroBoleto, numeroConvenio);
         return ResponseEntity.noContent().build();
     }
 }

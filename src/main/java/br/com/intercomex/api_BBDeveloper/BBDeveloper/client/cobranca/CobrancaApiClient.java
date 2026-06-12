@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Slf4j
 @Component
@@ -23,18 +24,24 @@ public class CobrancaApiClient extends BBClientSupport {
     }
 
     public BoletoListaResponseDTO listarBoletos(String token, Integer numeroConvenio,
+                                                String agenciaBeneficiario, String contaBeneficiario,
                                                 String dataInicio, String dataFim) {
-        log.info("Listando boletos — convênio: {}, período: {} a {}", numeroConvenio, dataInicio, dataFim);
+        log.info("Listando boletos — convênio: {}, agência: {}, conta: {}, período: {} a {}",
+                numeroConvenio, agenciaBeneficiario, contaBeneficiario, dataInicio, dataFim);
+
+        String uri = UriComponentsBuilder.fromUriString(properties.getCobrancaBaseUrl() + "/boletos")
+                .queryParam("gw-dev-app-key", properties.getDeveloperKey())
+                .queryParam("numeroConvenio", numeroConvenio)
+                .queryParam("agenciaBeneficiario", agenciaBeneficiario)
+                .queryParam("contaBeneficiario", contaBeneficiario)
+                .queryParam("indicadorSituacao", "A")
+                .queryParam("dataInicioVencimento", dataInicio)
+                .queryParam("dataFimVencimento", dataFim)
+                .build()
+                .toUriString();
 
         return bbWebClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path(properties.getCobrancaBaseUrl() + "/boletos")
-                        .queryParam("gw-dev-app-key", properties.getDeveloperKey())
-                        .queryParam("numeroConvenio", numeroConvenio)
-                        .queryParam("indicadorSituacao", "A")
-                        .queryParam("dataInicioVencimento", dataInicio)
-                        .queryParam("dataFimVencimento", dataFim)
-                        .build())
+                .uri(uri)
                 .header("Authorization", "Bearer " + token)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
@@ -60,11 +67,11 @@ public class CobrancaApiClient extends BBClientSupport {
                 .block();
     }
 
-    public BoletoPixResponseDTO consultarPixBoleto(String token, String numeroBoleto) {
-        log.info("Consultando Pix do boleto: {}", numeroBoleto);
+    public BoletoPixResponseDTO consultarPixBoleto(String token, String numeroBoleto, Integer numeroConvenio) {
+        log.info("Consultando Pix do boleto: {} (convênio: {})", numeroBoleto, numeroConvenio);
 
         return bbWebClient.get()
-                .uri(cobrancaUri("/boletos/" + numeroBoleto + "/pix"))
+                .uri(boletoPixUri(numeroBoleto, numeroConvenio))
                 .header("Authorization", "Bearer " + token)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
@@ -74,11 +81,11 @@ public class CobrancaApiClient extends BBClientSupport {
                 .block();
     }
 
-    public BoletoPixResponseDTO gerarPixBoleto(String token, String numeroBoleto) {
-        log.info("Gerando Pix para boleto: {}", numeroBoleto);
+    public BoletoPixResponseDTO gerarPixBoleto(String token, String numeroBoleto, Integer numeroConvenio) {
+        log.info("Gerando Pix para boleto: {} (convênio: {})", numeroBoleto, numeroConvenio);
 
         return bbWebClient.post()
-                .uri(cobrancaUri("/boletos/" + numeroBoleto + "/pix"))
+                .uri(boletoPixUri(numeroBoleto, numeroConvenio))
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("{}")
@@ -89,16 +96,25 @@ public class CobrancaApiClient extends BBClientSupport {
                 .block();
     }
 
-    public void cancelarPixBoleto(String token, String numeroBoleto) {
-        log.info("Cancelando Pix do boleto: {}", numeroBoleto);
+    public void cancelarPixBoleto(String token, String numeroBoleto, Integer numeroConvenio) {
+        log.info("Cancelando Pix do boleto: {} (convênio: {})", numeroBoleto, numeroConvenio);
 
         bbWebClient.delete()
-                .uri(cobrancaUri("/boletos/" + numeroBoleto + "/pix"))
+                .uri(boletoPixUri(numeroBoleto, numeroConvenio))
                 .header("Authorization", "Bearer " + token)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, errorHandler(API, "cancelar Pix boleto"))
                 .bodyToMono(Void.class)
                 .doOnSuccess(r -> log.info("Pix do boleto cancelado com sucesso"))
                 .block();
+    }
+
+    private String boletoPixUri(String numeroBoleto, Integer numeroConvenio) {
+        return UriComponentsBuilder
+                .fromUriString(properties.getCobrancaBaseUrl() + "/boletos/" + numeroBoleto + "/pix")
+                .queryParam("gw-dev-app-key", properties.getDeveloperKey())
+                .queryParam("numeroConvenio", numeroConvenio)
+                .build()
+                .toUriString();
     }
 }

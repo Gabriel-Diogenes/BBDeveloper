@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "bbdeveloper-api-collection",
     "name": "BB Developer - API Local",
-    "description": "Collection para testar a aplicação **BBDeveloper** (Spring Boot) em `http://localhost:8080`.\n\nA aplicação obtém token OAuth2 + mTLS internamente — **não envie Authorization** nas requisições locais.\n\n---\n\n## Como importar\n\n1. Postman → **Import** → `postman/BBDeveloper.postman_collection.json`\n2. (Opcional) Importe também `postman/BBDeveloper.local.postman_environment.json` e selecione o environment **BBDeveloper - Local**\n3. Suba a aplicação Spring Boot antes de testar\n\n---\n\n## Variáveis\n\n| Variável | Descrição |\n|----------|------------|\n| `baseUrl` | URL local (padrão: http://localhost:8080) |\n| `pixKey` | Chave PIX (`bb.pix-key`) |\n| `txid` / `txidCobv` | Gerados e salvos automaticamente |\n| `inicio` / `fim` | Listagem PIX — atualizados automaticamente (últimos 3 dias) |\n| `dataVencimentoCobv` | Vencimento CobV (+30 dias, automático) |\n| `agencia` / `conta` | Extrato homologação: 1505 / 1348 |\n| `dataInicio` / `dataFim` | Extrato — dd.MM.yyyy (homologação: 19.04.2023–23.04.2023) |\n| `numeroConvenio` | Convênio de boletos |\n| `numeroBoleto` | Salvo após registrar boleto |\n\n---\n\n## Regras BB\n\n- **txid**: 26–35 caracteres alfanuméricos `[a-zA-Z0-9]`\n- **Listagem PIX**: intervalo `inicio`–`fim` menor que 5 dias\n- **Extrato homologação**: agência `1505`, conta `1348`, datas `19.04.2023` a `23.04.2023`\n\n---\n\n## Ordem sugerida\n\n1. **Autenticação** → Gerar Token (opcional, valida OAuth)\n2. **PIX Cob** → Criar Cob → Consultar → Listar\n3. **PIX CobV** → Criar CobV → Consultar\n4. **Extrato** → Consultar Extrato\n5. **Cobrança** → Registrar Boleto → Pix do Boleto",
+    "description": "Collection para testar a aplicação **BBDeveloper** (Spring Boot) em `http://localhost:8080`.\n\nA aplicação obtém token OAuth2 + mTLS internamente — **não envie Authorization** nas requisições locais.\n\nOs endpoints locais espelham a **API Pix v2** (BACEN/BB) e a **API Cobranças v2** (BB) — sem atalhos que não existem na documentação oficial.\n\n---\n\n## Como importar\n\n1. Postman → **Import** → `postman/BBDeveloper.postman_collection.json`\n2. (Opcional) Importe também `postman/BBDeveloper.local.postman_environment.json` e selecione o environment **BBDeveloper - Local**\n3. Suba a aplicação Spring Boot antes de testar\n\n---\n\n## Variáveis\n\n| Variável | Descrição |\n|----------|------------|\n| `baseUrl` | URL local (padrão: http://localhost:8080) |\n| `pixKey` | Chave PIX — **deve estar registrada na conta do seu app** |\n| `txid` / `txidCobv` | Gerados e salvos automaticamente |\n| `inicio` / `fim` | Listagem PIX — atualizados automaticamente (últimos 3 dias) |\n| `dataVencimentoCobv` | Vencimento CobV (+30 dias, automático) |\n| `agencia` / `conta` | Extrato homologação: 1505 / 1348 |\n| `dataInicio` / `dataFim` | Extrato — dd.MM.yyyy (homologação: 19.04.2023–23.04.2023) |\n| `numeroConvenio` | Convênio de boletos (homolog: 3128557) |\n| `agenciaBeneficiario` / `contaBeneficiario` | Beneficiário do convênio p/ listar boletos (homolog: 452 / 123873) |\n| `numeroBoleto` | Salvo após registrar boleto |\n\n---\n\n## Regras BB\n\n- **txid**: 26–35 caracteres alfanuméricos `[a-zA-Z0-9]`\n- **Listagem PIX**: intervalo `inicio`–`fim` menor que 5 dias\n- **Cancelar Cob/CobV**: use PATCH com `\"status\": \"REMOVIDA_PELO_USUARIO_RECEBEDOR\"` (não existe DELETE na API Pix v2)\n- **Criar CobV**: use PUT `/pix/cobv/{txid}` (não existe POST `/cobv` na API Pix v2)\n- **Extrato homologação**: agência `1505`, conta `1348`, datas `19.04.2023` a `23.04.2023`\n- **Extrato page-size**: omitir parâmetro (BB usa 120) ou informar entre `30` e `120`\n- **PIX Cob/CobV (criar)**: a `pixKey` precisa estar registrada na conta vinculada às credenciais; caso contrário o BB retorna 400 `code 305` (chave não localizada)\n- **Listar boletos**: exige `numeroConvenio` + `agenciaBeneficiario` + `contaBeneficiario`\n- **Pix do boleto (consultar/gerar/cancelar)**: exige `numeroConvenio`\n\n---\n\n## Ordem sugerida\n\n1. **Autenticação** → Gerar Token (opcional, valida OAuth)\n2. **PIX Cob** → Criar Cob → Consultar → Listar\n3. **PIX CobV** → Criar CobV (PUT) → Consultar\n4. **Extrato** → Consultar Extrato\n5. **Cobrança** → Registrar Boleto → Pix do Boleto",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "event": [
@@ -27,7 +27,7 @@
   ],
   "variable": [
     { "key": "baseUrl", "value": "http://localhost:8080" },
-    { "key": "pixKey", "value": "hmtestes2@bb.com.br" },
+    { "key": "pixKey", "value": "9e881f18-cc66-4fc7-8f2c-a795dbb2bfc1" },
     { "key": "txid", "value": "" },
     { "key": "txidCobv", "value": "" },
     { "key": "inicio", "value": "2026-06-05T00:00:00Z" },
@@ -38,6 +38,8 @@
     { "key": "dataInicio", "value": "19.04.2023" },
     { "key": "dataFim", "value": "23.04.2023" },
     { "key": "numeroConvenio", "value": "3128557" },
+    { "key": "agenciaBeneficiario", "value": "452" },
+    { "key": "contaBeneficiario", "value": "123873" },
     { "key": "numeroBoleto", "value": "" }
   ],
   "item": [
@@ -192,11 +194,16 @@
           "response": []
         },
         {
-          "name": "Cancelar Cob",
+          "name": "Cancelar Cob (PATCH)",
           "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": "{{baseUrl}}/pix/cob/{{txid}}"
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"REMOVIDA_PELO_USUARIO_RECEBEDOR\"\n}"
+            },
+            "url": "{{baseUrl}}/pix/cob/{{txid}}",
+            "description": "Cancelamento conforme API Pix v2 — revisão com status REMOVIDA_PELO_USUARIO_RECEBEDOR."
           },
           "response": []
         }
@@ -249,34 +256,6 @@
           "response": []
         },
         {
-          "name": "Criar CobV sem txid (POST)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
-                  "if (pm.response.code === 201) {",
-                  "    const b = pm.response.json();",
-                  "    if (b.txid) pm.collectionVariables.set('txidCobv', b.txid);",
-                  "}"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"calendario\": {\n    \"dataDeVencimento\": \"{{dataVencimentoCobv}}\",\n    \"validadeAposVencimento\": 30\n  },\n  \"devedor\": {\n    \"cpf\": \"12345678909\",\n    \"nome\": \"Francisco da Silva\",\n    \"logradouro\": \"Rua Exemplo, 100\",\n    \"cidade\": \"Brasilia\",\n    \"uf\": \"DF\",\n    \"cep\": \"70040912\"\n  },\n  \"valor\": { \"original\": \"10.00\" },\n  \"chave\": \"{{pixKey}}\",\n  \"solicitacaoPagador\": \"Pagamento de servico prestado\"\n}"
-            },
-            "url": "{{baseUrl}}/pix/cobv"
-          },
-          "response": []
-        },
-        {
           "name": "Consultar CobV",
           "request": {
             "method": "GET",
@@ -318,11 +297,16 @@
           "response": []
         },
         {
-          "name": "Cancelar CobV",
+          "name": "Cancelar CobV (PATCH)",
           "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": "{{baseUrl}}/pix/cobv/{{txidCobv}}"
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"REMOVIDA_PELO_USUARIO_RECEBEDOR\"\n}"
+            },
+            "url": "{{baseUrl}}/pix/cobv/{{txidCobv}}",
+            "description": "Cancelamento conforme API Pix v2 — revisão com status REMOVIDA_PELO_USUARIO_RECEBEDOR."
           },
           "response": []
         }
@@ -363,7 +347,7 @@
                 { "key": "dataInicio", "value": "{{dataInicio}}", "description": "Obrigatório — dd.MM.yyyy" },
                 { "key": "dataFim", "value": "{{dataFim}}", "description": "Obrigatório — dd.MM.yyyy" },
                 { "key": "pagina", "value": "1", "description": "Opcional", "disabled": true },
-                { "key": "quantidadePorPagina", "value": "200", "description": "Opcional", "disabled": true }
+                { "key": "quantidadePorPagina", "value": "120", "description": "Opcional — BB: mín 30, máx 120 (omitir = 120)", "disabled": true }
               ]
             },
             "description": "Consulta extrato conta corrente (API Extratos v2).\n\n**Homologação:** agencia=1505, conta=1348, datas 19.04.2023–23.04.2023."
@@ -376,7 +360,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/extrato?agencia={{agencia}}&conta={{conta}}&dataInicio={{dataInicio}}&dataFim={{dataFim}}&pagina=1&quantidadePorPagina=200",
+              "raw": "{{baseUrl}}/extrato?agencia={{agencia}}&conta={{conta}}&dataInicio={{dataInicio}}&dataFim={{dataFim}}&pagina=1&quantidadePorPagina=120",
               "host": ["{{baseUrl}}"],
               "path": ["extrato"],
               "query": [
@@ -385,7 +369,7 @@
                 { "key": "dataInicio", "value": "{{dataInicio}}" },
                 { "key": "dataFim", "value": "{{dataFim}}" },
                 { "key": "pagina", "value": "1" },
-                { "key": "quantidadePorPagina", "value": "200" }
+                { "key": "quantidadePorPagina", "value": "120" }
               ]
             }
           },
@@ -402,13 +386,16 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/cobranca/boletos?numeroConvenio={{numeroConvenio}}",
+              "raw": "{{baseUrl}}/cobranca/boletos?numeroConvenio={{numeroConvenio}}&agenciaBeneficiario={{agenciaBeneficiario}}&contaBeneficiario={{contaBeneficiario}}",
               "host": ["{{baseUrl}}"],
               "path": ["cobranca", "boletos"],
               "query": [
-                { "key": "numeroConvenio", "value": "{{numeroConvenio}}" }
+                { "key": "numeroConvenio", "value": "{{numeroConvenio}}", "description": "Obrigatório" },
+                { "key": "agenciaBeneficiario", "value": "{{agenciaBeneficiario}}", "description": "Obrigatório — sem dígito e sem zeros à esquerda (homolog: 452)" },
+                { "key": "contaBeneficiario", "value": "{{contaBeneficiario}}", "description": "Obrigatório — sem dígito e sem zeros à esquerda (homolog: 123873)" }
               ]
-            }
+            },
+            "description": "Requer numeroConvenio + agência e conta do beneficiário. Homologação BB pode retornar 502 (instabilidade do gateway)."
           },
           "response": []
         },
@@ -453,7 +440,14 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/cobranca/boletos/{{numeroBoleto}}/pix"
+            "url": {
+              "raw": "{{baseUrl}}/cobranca/boletos/{{numeroBoleto}}/pix?numeroConvenio={{numeroConvenio}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["cobranca", "boletos", "{{numeroBoleto}}", "pix"],
+              "query": [
+                { "key": "numeroConvenio", "value": "{{numeroConvenio}}", "description": "Obrigatório" }
+              ]
+            }
           },
           "response": []
         },
@@ -462,7 +456,14 @@
           "request": {
             "method": "POST",
             "header": [],
-            "url": "{{baseUrl}}/cobranca/boletos/{{numeroBoleto}}/pix"
+            "url": {
+              "raw": "{{baseUrl}}/cobranca/boletos/{{numeroBoleto}}/pix?numeroConvenio={{numeroConvenio}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["cobranca", "boletos", "{{numeroBoleto}}", "pix"],
+              "query": [
+                { "key": "numeroConvenio", "value": "{{numeroConvenio}}", "description": "Obrigatório" }
+              ]
+            }
           },
           "response": []
         },
@@ -471,7 +472,14 @@
           "request": {
             "method": "DELETE",
             "header": [],
-            "url": "{{baseUrl}}/cobranca/boletos/{{numeroBoleto}}/pix"
+            "url": {
+              "raw": "{{baseUrl}}/cobranca/boletos/{{numeroBoleto}}/pix?numeroConvenio={{numeroConvenio}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["cobranca", "boletos", "{{numeroBoleto}}", "pix"],
+              "query": [
+                { "key": "numeroConvenio", "value": "{{numeroConvenio}}", "description": "Obrigatório" }
+              ]
+            }
           },
           "response": []
         }

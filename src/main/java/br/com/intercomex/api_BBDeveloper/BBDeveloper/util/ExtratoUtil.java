@@ -19,7 +19,7 @@ public class ExtratoUtil {
         if (numeros.isBlank()) {
             throw new IllegalArgumentException("Agência inválida.");
         }
-        return String.format("%04d", Integer.parseInt(numeros));
+        return String.valueOf(Integer.parseInt(numeros));
     }
 
     public static String formatarConta(String conta) {
@@ -30,7 +30,7 @@ public class ExtratoUtil {
         if (numeros.isBlank()) {
             throw new IllegalArgumentException("Conta inválida.");
         }
-        return numeros;
+        return String.valueOf(Integer.parseInt(numeros));
     }
 
     /**
@@ -42,7 +42,7 @@ public class ExtratoUtil {
         }
 
         String valor = data.trim();
-        if (valor.matches("\\d{7,8}")) {
+        if (valor.matches("\\d{8}")) {
             return valor;
         }
 

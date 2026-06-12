@@ -44,13 +44,6 @@ public class PixService {
         return pixApiClient.revisarCob(txid, request, bearer());
     }
 
-    public PixCobrancaImediataDTO cancelarCob(String txid) {
-        PixUtil.validarTxid(txid);
-        log.debug("Cancelando Cob — txid: {}", txid);
-        return revisarCob(txid, new PixCobrancaRequestDTO(
-                null, null, null, null, null, null, null, "REMOVIDA_PELO_USUARIO_RECEBEDOR"));
-    }
-
     public PixCobListaResponseDTO listarCobs(
             String inicio, String fim, String cpf, String cnpj, String status,
             Integer paginaAtual, Integer itensPorPagina) {
@@ -68,11 +61,6 @@ public class PixService {
         return pixApiClient.criarCobv(txidValido, request, bearer());
     }
 
-    public PixCobvResponseDTO criarCobvSemTxid(PixCobvRequestDTO request) {
-        log.debug("Criando CobV sem txid");
-        return pixApiClient.criarCobvSemTxid(request, bearer());
-    }
-
     public PixCobvResponseDTO consultarCobv(String txid) {
         PixUtil.validarTxid(txid);
         log.debug("Consultando CobV — txid: {}", txid);
@@ -83,13 +71,6 @@ public class PixService {
         PixUtil.validarTxid(txid);
         log.debug("Revisando CobV — txid: {}", txid);
         return pixApiClient.revisarCobv(txid, request, bearer());
-    }
-
-    public PixCobvResponseDTO cancelarCobv(String txid) {
-        PixUtil.validarTxid(txid);
-        log.debug("Cancelando CobV — txid: {}", txid);
-        return revisarCobv(txid, new PixCobvRequestDTO(
-                null, null, null, null, null, null, null, "REMOVIDA_PELO_USUARIO_RECEBEDOR"));
     }
 
     public PixCobvListaResponseDTO listarCobvs(
