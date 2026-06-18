@@ -46,7 +46,14 @@ public class CobrancaService {
                 bearer(), numeroConvenio, agencia, conta, dataInicio, dataFim);
     }
 
-    public BoletoResponseDTO registrarBoleto(
+    public BoletoResponseDTO registrarBoleto(BoletoRegistrarRequestDTO request) {
+        BoletoRegistrarRequestDTO normalizado = normalizarRegistro(request);
+        log.debug("Registrando boleto — convênio: {}, valor: {}",
+                normalizado.numeroConvenio(), normalizado.valorOriginal());
+        return cobrancaApiClient.registrarBoleto(bearer(), normalizado);
+    }
+
+    public BoletoResponseDTO registrarBoletoSimplificado(
             Integer numeroConvenio,
             String nomePagador,
             String cpfCnpjPagador,
@@ -97,7 +104,7 @@ public class CobrancaService {
                 )
         );
 
-        return cobrancaApiClient.registrarBoleto(bearer(), request);
+        return registrarBoleto(request);
     }
 
     public BoletoConsultaResponseDTO consultarBoleto(String numeroBoleto, Integer numeroConvenio) {
@@ -141,6 +148,79 @@ public class CobrancaService {
             throw new IllegalStateException("Falha ao obter token de acesso");
         }
         return token.accessToken();
+    }
+
+    private BoletoRegistrarRequestDTO normalizarRegistro(BoletoRegistrarRequestDTO request) {
+        if (request == null) {
+            throw new IllegalArgumentException("Body do boleto é obrigatório.");
+        }
+        if (request.numeroConvenio() == null) {
+            throw new IllegalArgumentException("numeroConvenio é obrigatório.");
+        }
+        if (request.valorOriginal() == null || request.valorOriginal() <= 0) {
+            throw new IllegalArgumentException("valorOriginal deve ser maior que zero.");
+        }
+        if (request.dataEmissao() == null || request.dataEmissao().isBlank()) {
+            throw new IllegalArgumentException("dataEmissao é obrigatória (formato dd.MM.yyyy).");
+        }
+        if (request.dataVencimento() == null || request.dataVencimento().isBlank()) {
+            throw new IllegalArgumentException("dataVencimento é obrigatória (formato dd.MM.yyyy).");
+        }
+        if (request.pagador() == null) {
+            throw new IllegalArgumentException("pagador é obrigatório.");
+        }
+
+        BoletoRegistrarRequestDTO.Pagador pagador = request.pagador();
+        if (pagador.nome() == null || pagador.nome().isBlank()) {
+            throw new IllegalArgumentException("pagador.nome é obrigatório.");
+        }
+        if (pagador.numeroInscricao() == null || pagador.numeroInscricao().isBlank()) {
+            throw new IllegalArgumentException("pagador.numeroInscricao é obrigatório.");
+        }
+
+        String inscricao = pagador.numeroInscricao().replaceAll("\\D", "");
+        Integer tipoInscricao = pagador.tipoInscricao() != null
+                ? pagador.tipoInscricao()
+                : (inscricao.length() <= 11 ? 1 : 2);
+
+        BoletoRegistrarRequestDTO.Pagador pagadorNormalizado = new BoletoRegistrarRequestDTO.Pagador(
+                tipoInscricao,
+                inscricao,
+                pagador.nome(),
+                pagador.endereco() != null ? pagador.endereco() : "Endereço não informado",
+                pagador.cep() != null ? pagador.cep().replaceAll("\\D", "") : "70040912",
+                pagador.cidade() != null ? pagador.cidade() : "Brasília",
+                pagador.bairro() != null ? pagador.bairro() : "Centro",
+                pagador.uf() != null ? pagador.uf() : "DF",
+                pagador.telefone() != null ? pagador.telefone() : ""
+        );
+
+        String numeroTituloCliente = request.numeroTituloCliente();
+        if (numeroTituloCliente == null || numeroTituloCliente.isBlank()) {
+            long sequencial = System.currentTimeMillis() % 10000000000L;
+            numeroTituloCliente = String.format("000%07d%010d", request.numeroConvenio(), sequencial);
+        }
+
+        return new BoletoRegistrarRequestDTO(
+                request.numeroConvenio(),
+                request.numeroCarteira() != null ? request.numeroCarteira() : 17,
+                request.numeroVariacaoCarteira() != null ? request.numeroVariacaoCarteira() : 35,
+                request.codigoModalidade() != null ? request.codigoModalidade() : 1,
+                request.dataEmissao(),
+                request.dataVencimento(),
+                request.valorOriginal(),
+                request.indicadorAceiteTituloVencido() != null ? request.indicadorAceiteTituloVencido() : "N",
+                request.codigoAceite() != null ? request.codigoAceite() : "A",
+                request.codigoTipoTitulo() != null ? request.codigoTipoTitulo() : 2,
+                request.descricaoTipoTitulo() != null ? request.descricaoTipoTitulo() : "DUPLICATA MERCANTIL",
+                request.indicadorPermissaoRecebimentoParcial() != null ? request.indicadorPermissaoRecebimentoParcial() : "N",
+                request.numeroTituloBeneficiario() != null ? request.numeroTituloBeneficiario() : "1",
+                formatarCampoUtilizacaoBeneficiario(request.campoUtilizacaoBeneficiario()),
+                numeroTituloCliente,
+                request.mensagemBloquetoOcorrencia() != null ? request.mensagemBloquetoOcorrencia() : "",
+                request.indicadorPix() != null ? request.indicadorPix() : "S",
+                pagadorNormalizado
+        );
     }
 
     private String formatarCampoUtilizacaoBeneficiario(String texto) {

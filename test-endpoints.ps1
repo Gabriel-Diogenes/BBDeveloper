@@ -87,7 +87,35 @@ if ($e2eid) {
 
 # 5. Cobrança
 Invoke-Test -Name "Cobranca - Listar Boletos" -Method GET -Url "$base/cobranca/boletos?numeroConvenio=3128557&agenciaBeneficiario=452&contaBeneficiario=123873" | Out-Null
-$boletoResp = Invoke-Test -Name "Cobranca - Registrar Boleto" -Method POST -Url "$base/cobranca/boletos?numeroConvenio=3128557&nomePagador=Francisco%20da%20Silva&cpfCnpj=12345678909&valor=10.00&diasVencimento=30&comPix=true"
+$dataHoje = Get-Date -Format "dd.MM.yyyy"
+$dataVenc = (Get-Date).AddDays(30).ToString("dd.MM.yyyy")
+$seq = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds() % 10000000000
+$numeroTitulo = "0003128557{0:D10}" -f $seq
+$boletoBody = @"
+{
+  "numeroConvenio": 3128557,
+  "numeroCarteira": 17,
+  "numeroVariacaoCarteira": 35,
+  "codigoModalidade": 1,
+  "dataEmissao": "$dataHoje",
+  "dataVencimento": "$dataVenc",
+  "valorOriginal": 10.00,
+  "indicadorPix": "S",
+  "numeroTituloCliente": "$numeroTitulo",
+  "campoUtilizacaoBeneficiario": "SERVICO PRESTADO",
+  "pagador": {
+    "tipoInscricao": 1,
+    "numeroInscricao": "12345678909",
+    "nome": "Francisco da Silva",
+    "endereco": "Rua Exemplo 100",
+    "cep": "70040912",
+    "cidade": "Brasilia",
+    "bairro": "Centro",
+    "uf": "DF"
+  }
+}
+"@
+$boletoResp = Invoke-Test -Name "Cobranca - Registrar Boleto (payload)" -Method POST -Url "$base/cobranca/boletos" -Body $boletoBody
 $numeroBoleto = $null
 if ($boletoResp) { try { $numeroBoleto = ($boletoResp | ConvertFrom-Json).numero } catch {} }
 Write-Host "`n>>> numeroBoleto capturado: $numeroBoleto" -ForegroundColor Yellow

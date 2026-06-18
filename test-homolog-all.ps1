@@ -123,7 +123,42 @@ if ($e2eid) {
 
 # Cobranca
 Invoke-Test -Name "16 Cob Listar Boletos" -Method GET -Url "$base/cobranca/boletos?numeroConvenio=$convenio&agenciaBeneficiario=$agencia&contaBeneficiario=$conta" -AcceptStatus @(200, 502)
-$boletoResp = Invoke-Test -Name "17 Cob Registrar Boleto" -Method POST -Url "$base/cobranca/boletos?numeroConvenio=$convenio&nomePagador=Francisco%20da%20Silva&cpfCnpj=12345678909&valor=10.00&diasVencimento=30&comPix=true"
+$dataHoje = Get-Date -Format "dd.MM.yyyy"
+$dataVenc = (Get-Date).AddDays(30).ToString("dd.MM.yyyy")
+$seq = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds() % 10000000000
+$numeroTitulo = "000{0:D7}{1:D10}" -f $convenio, $seq
+$boletoBody = @"
+{
+  "numeroConvenio": $convenio,
+  "numeroCarteira": 17,
+  "numeroVariacaoCarteira": 35,
+  "codigoModalidade": 1,
+  "dataEmissao": "$dataHoje",
+  "dataVencimento": "$dataVenc",
+  "valorOriginal": 10.00,
+  "indicadorAceiteTituloVencido": "N",
+  "codigoAceite": "A",
+  "codigoTipoTitulo": 2,
+  "descricaoTipoTitulo": "DUPLICATA MERCANTIL",
+  "indicadorPermissaoRecebimentoParcial": "N",
+  "numeroTituloBeneficiario": "1",
+  "campoUtilizacaoBeneficiario": "SERVICO PRESTADO",
+  "numeroTituloCliente": "$numeroTitulo",
+  "indicadorPix": "S",
+  "pagador": {
+    "tipoInscricao": 1,
+    "numeroInscricao": "12345678909",
+    "nome": "Francisco da Silva",
+    "endereco": "Rua Exemplo 100",
+    "cep": "70040912",
+    "cidade": "Brasilia",
+    "bairro": "Centro",
+    "uf": "DF",
+    "telefone": ""
+  }
+}
+"@
+$boletoResp = Invoke-Test -Name "17 Cob Registrar Boleto (payload)" -Method POST -Url "$base/cobranca/boletos" -Body $boletoBody -AcceptStatus @(200, 201)
 $numeroBoleto = $null
 if ($boletoResp) { try { $numeroBoleto = ($boletoResp | ConvertFrom-Json).numero } catch {} }
 

@@ -42,7 +42,10 @@
     { "key": "contaBeneficiario", "value": "123873" },
     { "key": "numeroBoleto", "value": "" },
     { "key": "e2eid", "value": "" },
-    { "key": "devolucaoId", "value": "" }
+    { "key": "devolucaoId", "value": "" },
+    { "key": "dataEmissaoBoleto", "value": "" },
+    { "key": "dataVencimentoBoleto", "value": "" },
+    { "key": "numeroTituloCliente", "value": "" }
   ],
   "item": [
     {
@@ -498,15 +501,61 @@
           "response": []
         },
         {
-          "name": "Registrar Boleto",
+          "name": "Registrar Boleto (payload completo)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const fmt = (d) => { const p = (n) => String(n).padStart(2, '0'); return `${p(d.getDate())}.${p(d.getMonth()+1)}.${d.getFullYear()}`; };",
+                  "const hoje = new Date();",
+                  "const venc = new Date(hoje); venc.setDate(venc.getDate() + 30);",
+                  "const conv = parseInt(pm.collectionVariables.get('numeroConvenio') || '3128557', 10);",
+                  "const seq = Date.now() % 10000000000;",
+                  "const numeroTitulo = `000${String(conv).padStart(7,'0')}${String(seq).padStart(10,'0')}`;",
+                  "pm.collectionVariables.set('dataEmissaoBoleto', fmt(hoje));",
+                  "pm.collectionVariables.set('dataVencimentoBoleto', fmt(venc));",
+                  "pm.collectionVariables.set('numeroTituloCliente', numeroTitulo);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.expect([200, 201]).to.include(pm.response.code));",
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const b = pm.response.json();",
+                  "    if (b.numero) pm.collectionVariables.set('numeroBoleto', b.numero);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numeroConvenio\": {{numeroConvenio}},\n  \"numeroCarteira\": 17,\n  \"numeroVariacaoCarteira\": 35,\n  \"codigoModalidade\": 1,\n  \"dataEmissao\": \"{{dataEmissaoBoleto}}\",\n  \"dataVencimento\": \"{{dataVencimentoBoleto}}\",\n  \"valorOriginal\": 10.00,\n  \"indicadorAceiteTituloVencido\": \"N\",\n  \"codigoAceite\": \"A\",\n  \"codigoTipoTitulo\": 2,\n  \"descricaoTipoTitulo\": \"DUPLICATA MERCANTIL\",\n  \"indicadorPermissaoRecebimentoParcial\": \"N\",\n  \"numeroTituloBeneficiario\": \"1\",\n  \"campoUtilizacaoBeneficiario\": \"SERVICO PRESTADO\",\n  \"numeroTituloCliente\": \"{{numeroTituloCliente}}\",\n  \"indicadorPix\": \"S\",\n  \"pagador\": {\n    \"tipoInscricao\": 1,\n    \"numeroInscricao\": \"12345678909\",\n    \"nome\": \"Francisco da Silva\",\n    \"endereco\": \"Rua Exemplo 100\",\n    \"cep\": \"70040912\",\n    \"cidade\": \"Brasilia\",\n    \"bairro\": \"Centro\",\n    \"uf\": \"DF\",\n    \"telefone\": \"\"\n  }\n}"
+            },
+            "url": "{{baseUrl}}/cobranca/boletos",
+            "description": "Registro com payload JSON completo (espelha API Cobranças v2 do BB)."
+          },
+          "response": []
+        },
+        {
+          "name": "Registrar Boleto (simplificado)",
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
-                  "if (pm.response.code === 200) {",
+                  "pm.test('Status 201', () => pm.expect([200, 201]).to.include(pm.response.code));",
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
                   "    const b = pm.response.json();",
                   "    if (b.numero) pm.collectionVariables.set('numeroBoleto', b.numero);",
                   "}"
@@ -518,9 +567,9 @@
             "method": "POST",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/cobranca/boletos?numeroConvenio={{numeroConvenio}}&nomePagador=Francisco%20da%20Silva&cpfCnpj=12345678909&valor=10.00&diasVencimento=30&comPix=true",
+              "raw": "{{baseUrl}}/cobranca/boletos/simplificado?numeroConvenio={{numeroConvenio}}&nomePagador=Francisco%20da%20Silva&cpfCnpj=12345678909&valor=10.00&diasVencimento=30&comPix=true",
               "host": ["{{baseUrl}}"],
-              "path": ["cobranca", "boletos"],
+              "path": ["cobranca", "boletos", "simplificado"],
               "query": [
                 { "key": "numeroConvenio", "value": "{{numeroConvenio}}" },
                 { "key": "nomePagador", "value": "Francisco da Silva" },
@@ -529,7 +578,8 @@
                 { "key": "diasVencimento", "value": "30" },
                 { "key": "comPix", "value": "true" }
               ]
-            }
+            },
+            "description": "Atalho com query params — monta o payload internamente."
           },
           "response": []
         },

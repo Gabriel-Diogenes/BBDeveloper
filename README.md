@@ -29,7 +29,7 @@ Proxy **Spring Boot** (Java 17) para as APIs do [Portal BB Developers](https://d
 |------|-----------|
 | **Stack** | Java 17, Spring Boot 4.0.6, WebClient (Reactor Netty) |
 | **Porta padrão** | `8080` |
-| **Autenticação local** | Não é necessário enviar `Authorization` — o token OAuth2 é obtido internamente |
+| **Autenticação local** | Não é necessário enviar `Authorization` — o token OAuth2 é obtido internamente e **reutilizado em cache** (~9 min, margem de 60s antes do vencimento) |
 | **Ambientes** | `homologacao` (padrão) e `producao` |
 | **Escopos OAuth** | `pix.read`, `pix.write`, `cob.read`, `cob.write`, `cobv.read`, `cobv.write`, `cobrancas.boletos-info`, `cobrancas.boletos-requisicao`, `extrato-info` |
 
@@ -193,7 +193,7 @@ Não envie header `Authorization` nas requisições locais — o token é gerado
 
 | Método | Path | Descrição |
 |--------|------|-----------|
-| `POST` | `/token` | Gera token OAuth2 (opcional; útil para validar credenciais) |
+| `POST` | `/token` | Gera token OAuth2 (opcional; útil para validar credenciais). O mesmo token em cache é usado nas demais chamadas. |
 
 ### Pix — Cobrança imediata (Cob)
 
@@ -236,7 +236,8 @@ Não envie header `Authorization` nas requisições locais — o token é gerado
 | Método | Path local | API BB | Observação |
 |--------|------------|--------|------------|
 | `GET` | `/cobranca/boletos` | `GET /boletos` | Query: `numeroConvenio`, `agenciaBeneficiario`, `contaBeneficiario` |
-| `POST` | `/cobranca/boletos` | `POST /boletos` | Query: `numeroConvenio`, `nomePagador`, `cpfCnpj`, `valor`, `diasVencimento`, `comPix` |
+| `POST` | `/cobranca/boletos` | `POST /boletos` | Body JSON: `BoletoRegistrarRequestDTO` (payload completo BB). Retorna **201 Created**. |
+| `POST` | `/cobranca/boletos/simplificado` | `POST /boletos` | Query: `numeroConvenio`, `nomePagador`, `cpfCnpj`, `valor`, `diasVencimento`, `comPix` — monta o payload internamente |
 | `GET` | `/cobranca/boletos/{numeroBoleto}` | `GET /boletos/{id}` | Query: `numeroConvenio` |
 | `PATCH` | `/cobranca/boletos/{numeroBoleto}` | `PATCH /boletos/{id}` | Body: `BoletoAlterarRequestDTO` (inclui `numeroConvenio`) |
 | `POST` | `/cobranca/boletos/{numeroBoleto}/baixar` | `POST /boletos/{id}/baixar` | Query: `numeroConvenio` |
@@ -245,7 +246,7 @@ Não envie header `Authorization` nas requisições locais — o token é gerado
 | `POST` | `/cobranca/boletos/{numeroBoleto}/pix` | `POST /boletos/{id}/gerar-pix` | Query: `numeroConvenio` |
 | `DELETE` | `/cobranca/boletos/{numeroBoleto}/pix` | `POST /boletos/{id}/cancelar-pix` | Query: `numeroConvenio` |
 
-> **Registro simplificado:** `POST /cobranca/boletos` monta o payload completo do BB com defaults (carteira 17, variação 35, duplicata mercantil). Para payloads customizados, estenda o `CobrancaService`.
+> **Registro de boleto:** `POST /cobranca/boletos` aceita o JSON completo da API Cobranças v2 do BB (`BoletoRegistrarRequestDTO`). Campos omitidos recebem defaults no serviço (carteira 17, variação 35, duplicata mercantil, etc.). Use `POST /cobranca/boletos/simplificado` para o atalho com query params.
 
 > **Consulta vs registro:** `GET /boletos/{id}` retorna campos diferentes do `POST` (ex.: `codigoLinhaDigitavel`, `dataVencimentoTituloCobranca`). A API local usa `BoletoConsultaResponseDTO` na consulta e `BoletoResponseDTO` no registro.
 

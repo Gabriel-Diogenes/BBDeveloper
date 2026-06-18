@@ -1,7 +1,9 @@
 package br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record BoletoRegistrarRequestDTO(
         Integer numeroConvenio,
@@ -23,6 +25,7 @@ public record BoletoRegistrarRequestDTO(
         String indicadorPix,
         Pagador pagador
 ) {
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public record Pagador(
             Integer tipoInscricao,
             String numeroInscricao,

@@ -1,6 +1,7 @@
 package br.com.intercomex.api_BBDeveloper.BBDeveloper.controller;
 
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.request.BoletoAlterarRequestDTO;
+import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.request.BoletoRegistrarRequestDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.response.BoletoBaixaResponseDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.response.BoletoConsultaResponseDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.response.BoletoListaResponseDTO;
@@ -8,6 +9,7 @@ import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.response.Bolet
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.response.BoletoResponseDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.service.CobrancaService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,14 +31,21 @@ public class CobrancaController {
 
     @PostMapping("/boletos")
     public ResponseEntity<BoletoResponseDTO> registrarBoleto(
+            @RequestBody BoletoRegistrarRequestDTO request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(cobrancaService.registrarBoleto(request));
+    }
+
+    @PostMapping("/boletos/simplificado")
+    public ResponseEntity<BoletoResponseDTO> registrarBoletoSimplificado(
             @RequestParam Integer numeroConvenio,
             @RequestParam String nomePagador,
             @RequestParam String cpfCnpj,
             @RequestParam Double valor,
             @RequestParam(defaultValue = "30") Integer diasVencimento,
             @RequestParam(defaultValue = "true") Boolean comPix) {
-        return ResponseEntity.ok(
-                cobrancaService.registrarBoleto(numeroConvenio, nomePagador, cpfCnpj, valor, diasVencimento, comPix));
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                cobrancaService.registrarBoletoSimplificado(
+                        numeroConvenio, nomePagador, cpfCnpj, valor, diasVencimento, comPix));
     }
 
     @GetMapping("/boletos/{numeroBoleto}")
