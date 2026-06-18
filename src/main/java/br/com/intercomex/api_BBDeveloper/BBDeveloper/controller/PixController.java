@@ -2,16 +2,23 @@ package br.com.intercomex.api_BBDeveloper.BBDeveloper.controller;
 
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.pix.request.PixCobrancaRequestDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.pix.request.PixCobvRequestDTO;
+import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.pix.request.PixDevolucaoRequestDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.pix.response.PixCobListaResponseDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.pix.response.PixCobrancaImediataDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.pix.response.PixCobvListaResponseDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.pix.response.PixCobvResponseDTO;
+import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.pix.response.PixDevolucaoDTO;
+import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.pix.response.PixRecebidoDTO;
+import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.pix.response.PixRecebidoListaResponseDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.service.PixService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Webhook Pix: não implementado nesta API — será tratado separadamente no Oracle APEX.
+ */
 @RestController
 @RequestMapping("/pix")
 @RequiredArgsConstructor
@@ -87,5 +94,41 @@ public class PixController {
             @RequestParam(required = false) Integer itensPorPagina) {
         return ResponseEntity.ok(pixService.listarCobvs(
                 inicio, fim, cpf, cnpj, status, paginaAtual, itensPorPagina));
+    }
+
+    @GetMapping
+    public ResponseEntity<PixRecebidoListaResponseDTO> listarPixRecebidos(
+            @RequestParam(required = false) String inicio,
+            @RequestParam(required = false) String fim,
+            @RequestParam(required = false) String txid,
+            @RequestParam(required = false) Boolean txIdPresente,
+            @RequestParam(required = false) Boolean devolucaoPresente,
+            @RequestParam(required = false) String cpf,
+            @RequestParam(required = false) String cnpj,
+            @RequestParam(required = false) Integer paginaAtual,
+            @RequestParam(required = false) Integer itensPorPagina) {
+        return ResponseEntity.ok(pixService.listarPixRecebidos(
+                inicio, fim, txid, txIdPresente, devolucaoPresente, cpf, cnpj, paginaAtual, itensPorPagina));
+    }
+
+    @GetMapping("/{e2eid:E[a-zA-Z0-9]{31}}")
+    public ResponseEntity<PixRecebidoDTO> consultarPixRecebido(@PathVariable String e2eid) {
+        return ResponseEntity.ok(pixService.consultarPixRecebido(e2eid));
+    }
+
+    @PutMapping("/{e2eid:E[a-zA-Z0-9]{31}}/devolucao/{id}")
+    public ResponseEntity<PixDevolucaoDTO> solicitarDevolucao(
+            @PathVariable String e2eid,
+            @PathVariable String id,
+            @RequestBody PixDevolucaoRequestDTO request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(pixService.solicitarDevolucao(e2eid, id, request));
+    }
+
+    @GetMapping("/{e2eid:E[a-zA-Z0-9]{31}}/devolucao/{id}")
+    public ResponseEntity<PixDevolucaoDTO> consultarDevolucao(
+            @PathVariable String e2eid,
+            @PathVariable String id) {
+        return ResponseEntity.ok(pixService.consultarDevolucao(e2eid, id));
     }
 }

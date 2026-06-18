@@ -1,5 +1,8 @@
 package br.com.intercomex.api_BBDeveloper.BBDeveloper.controller;
 
+import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.request.BoletoAlterarRequestDTO;
+import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.response.BoletoBaixaResponseDTO;
+import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.response.BoletoConsultaResponseDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.response.BoletoListaResponseDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.response.BoletoPixResponseDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.response.BoletoResponseDTO;
@@ -34,6 +37,34 @@ public class CobrancaController {
             @RequestParam(defaultValue = "true") Boolean comPix) {
         return ResponseEntity.ok(
                 cobrancaService.registrarBoleto(numeroConvenio, nomePagador, cpfCnpj, valor, diasVencimento, comPix));
+    }
+
+    @GetMapping("/boletos/{numeroBoleto}")
+    public ResponseEntity<BoletoConsultaResponseDTO> consultarBoleto(
+            @PathVariable String numeroBoleto,
+            @RequestParam Integer numeroConvenio) {
+        return ResponseEntity.ok(cobrancaService.consultarBoleto(numeroBoleto, numeroConvenio));
+    }
+
+    @PatchMapping("/boletos/{numeroBoleto}")
+    public ResponseEntity<BoletoResponseDTO> alterarBoleto(
+            @PathVariable String numeroBoleto,
+            @RequestBody BoletoAlterarRequestDTO request) {
+        return ResponseEntity.ok(cobrancaService.alterarBoleto(numeroBoleto, request));
+    }
+
+    @PostMapping("/boletos/{numeroBoleto}/baixar")
+    public ResponseEntity<BoletoBaixaResponseDTO> baixarBoleto(
+            @PathVariable String numeroBoleto,
+            @RequestParam Integer numeroConvenio) {
+        return ResponseEntity.ok(cobrancaService.baixarBoleto(numeroBoleto, numeroConvenio));
+    }
+
+    @PostMapping("/boletos/{numeroBoleto}/cancelar")
+    public ResponseEntity<BoletoBaixaResponseDTO> cancelarBoleto(
+            @PathVariable String numeroBoleto,
+            @RequestParam Integer numeroConvenio) {
+        return ResponseEntity.ok(cobrancaService.cancelarBoleto(numeroBoleto, numeroConvenio));
     }
 
     @GetMapping("/boletos/{numeroBoleto}/pix")

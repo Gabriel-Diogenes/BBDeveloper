@@ -4,10 +4,14 @@ import br.com.intercomex.api_BBDeveloper.BBDeveloper.client.pix.PixApiClient;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.auth.TokenResponseDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.pix.request.PixCobrancaRequestDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.pix.request.PixCobvRequestDTO;
+import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.pix.request.PixDevolucaoRequestDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.pix.response.PixCobListaResponseDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.pix.response.PixCobrancaImediataDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.pix.response.PixCobvListaResponseDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.pix.response.PixCobvResponseDTO;
+import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.pix.response.PixDevolucaoDTO;
+import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.pix.response.PixRecebidoDTO;
+import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.pix.response.PixRecebidoListaResponseDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.util.PixUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -82,6 +86,38 @@ public class PixService {
         log.debug("Listando CobVs — período: {} a {}", inicioResolvido, fimResolvido);
         return pixApiClient.listarCobvs(
                 bearer(), inicioResolvido, fimResolvido, cpf, cnpj, status, paginaAtual, itensPorPagina);
+    }
+
+    public PixRecebidoListaResponseDTO listarPixRecebidos(
+            String inicio, String fim, String txid, Boolean txIdPresente, Boolean devolucaoPresente,
+            String cpf, String cnpj, Integer paginaAtual, Integer itensPorPagina) {
+        String inicioResolvido = resolverPeriodoInicio(inicio);
+        String fimResolvido = resolverPeriodoFim(fim);
+        PixUtil.validarPeriodoListagem(inicioResolvido, fimResolvido);
+        log.debug("Listando Pix recebidos — período: {} a {}", inicioResolvido, fimResolvido);
+        return pixApiClient.listarPixRecebidos(
+                bearer(), inicioResolvido, fimResolvido, txid, txIdPresente, devolucaoPresente,
+                cpf, cnpj, paginaAtual, itensPorPagina);
+    }
+
+    public PixRecebidoDTO consultarPixRecebido(String e2eid) {
+        PixUtil.validarE2eid(e2eid);
+        log.debug("Consultando Pix recebido — e2eid: {}", e2eid);
+        return pixApiClient.consultarPixRecebido(e2eid, bearer());
+    }
+
+    public PixDevolucaoDTO solicitarDevolucao(String e2eid, String id, PixDevolucaoRequestDTO request) {
+        PixUtil.validarE2eid(e2eid);
+        PixUtil.validarDevolucaoId(id);
+        log.debug("Solicitando devolução Pix — e2eid: {}, id: {}", e2eid, id);
+        return pixApiClient.solicitarDevolucao(e2eid, id, request, bearer());
+    }
+
+    public PixDevolucaoDTO consultarDevolucao(String e2eid, String id) {
+        PixUtil.validarE2eid(e2eid);
+        PixUtil.validarDevolucaoId(id);
+        log.debug("Consultando devolução Pix — e2eid: {}, id: {}", e2eid, id);
+        return pixApiClient.consultarDevolucao(e2eid, id, bearer());
     }
 
     private String bearer() {

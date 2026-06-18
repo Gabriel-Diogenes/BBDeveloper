@@ -72,7 +72,20 @@ if ($txidCobv) {
     Invoke-Test -Name "PIX CobV - Cancelar (PATCH)" -Method PATCH -Url "$base/pix/cobv/$txidCobv" -Body '{"status":"REMOVIDA_PELO_USUARIO_RECEBEDOR"}' | Out-Null
 }
 
-# 4. Cobrança
+# 4. PIX Recebidos
+$inicio = (Get-Date).AddDays(-3).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+$fim = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+$pixListResp = Invoke-Test -Name "PIX Recebidos - Listar" -Method GET -Url "$base/pix?inicio=$inicio&fim=$fim"
+$e2eid = $null
+if ($pixListResp) { try { $pl = $pixListResp | ConvertFrom-Json; if ($pl.pix -and $pl.pix.Count -gt 0) { $e2eid = $pl.pix[0].endToEndId } } catch {} }
+if ($e2eid) {
+    Invoke-Test -Name "PIX Recebidos - Consultar por e2eid" -Method GET -Url "$base/pix/$e2eid" | Out-Null
+    $devId = -join ((1..26) | ForEach-Object { "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".ToCharArray() | Get-Random })
+    Invoke-Test -Name "PIX Devolucao - Solicitar" -Method PUT -Url "$base/pix/$e2eid/devolucao/$devId" -Body '{"valor":"0.01"}' | Out-Null
+    Invoke-Test -Name "PIX Devolucao - Consultar" -Method GET -Url "$base/pix/$e2eid/devolucao/$devId" | Out-Null
+}
+
+# 5. Cobrança
 Invoke-Test -Name "Cobranca - Listar Boletos" -Method GET -Url "$base/cobranca/boletos?numeroConvenio=3128557&agenciaBeneficiario=452&contaBeneficiario=123873" | Out-Null
 $boletoResp = Invoke-Test -Name "Cobranca - Registrar Boleto" -Method POST -Url "$base/cobranca/boletos?numeroConvenio=3128557&nomePagador=Francisco%20da%20Silva&cpfCnpj=12345678909&valor=10.00&diasVencimento=30&comPix=true"
 $numeroBoleto = $null
@@ -80,6 +93,11 @@ if ($boletoResp) { try { $numeroBoleto = ($boletoResp | ConvertFrom-Json).numero
 Write-Host "`n>>> numeroBoleto capturado: $numeroBoleto" -ForegroundColor Yellow
 
 if ($numeroBoleto) {
+    $consultUrl = "$base/cobranca/boletos/$numeroBoleto" + "?numeroConvenio=3128557"
+    Invoke-Test -Name "Cobranca - Consultar Boleto" -Method GET -Url $consultUrl | Out-Null
+    $novaData = (Get-Date).AddDays(45).ToString("dd.MM.yyyy")
+    $altBody = "{`"numeroConvenio`":3128557,`"indicadorNovaDataVencimento`":`"S`",`"alteracaoData`":{`"novaDataVencimento`":`"$novaData`"}}"
+    Invoke-Test -Name "Cobranca - Alterar Boleto (PATCH)" -Method PATCH -Url "$base/cobranca/boletos/$numeroBoleto" -Body $altBody | Out-Null
     Invoke-Test -Name "Cobranca - Consultar Pix do Boleto" -Method GET -Url "$base/cobranca/boletos/$numeroBoleto/pix?numeroConvenio=3128557" | Out-Null
 }
 

@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "bbdeveloper-api-collection",
     "name": "BB Developer - API Local",
-    "description": "Collection para testar a aplicação **BBDeveloper** (Spring Boot) em `http://localhost:8080`.\n\nA aplicação obtém token OAuth2 + mTLS internamente — **não envie Authorization** nas requisições locais.\n\nOs endpoints locais espelham a **API Pix v2** (BACEN/BB) e a **API Cobranças v2** (BB) — sem atalhos que não existem na documentação oficial.\n\n---\n\n## Como importar\n\n1. Postman → **Import** → `postman/BBDeveloper.postman_collection.json`\n2. (Opcional) Importe também `postman/BBDeveloper.local.postman_environment.json` e selecione o environment **BBDeveloper - Local**\n3. Suba a aplicação Spring Boot antes de testar\n\n---\n\n## Variáveis\n\n| Variável | Descrição |\n|----------|------------|\n| `baseUrl` | URL local (padrão: http://localhost:8080) |\n| `pixKey` | Chave PIX — **deve estar registrada na conta do seu app** |\n| `txid` / `txidCobv` | Gerados e salvos automaticamente |\n| `inicio` / `fim` | Listagem PIX — atualizados automaticamente (últimos 3 dias) |\n| `dataVencimentoCobv` | Vencimento CobV (+30 dias, automático) |\n| `agencia` / `conta` | Extrato homologação: 1505 / 1348 |\n| `dataInicio` / `dataFim` | Extrato — dd.MM.yyyy (homologação: 19.04.2023–23.04.2023) |\n| `numeroConvenio` | Convênio de boletos (homolog: 3128557) |\n| `agenciaBeneficiario` / `contaBeneficiario` | Beneficiário do convênio p/ listar boletos (homolog: 452 / 123873) |\n| `numeroBoleto` | Salvo após registrar boleto |\n\n---\n\n## Regras BB\n\n- **txid**: 26–35 caracteres alfanuméricos `[a-zA-Z0-9]`\n- **Listagem PIX**: intervalo `inicio`–`fim` menor que 5 dias\n- **Cancelar Cob/CobV**: use PATCH com `\"status\": \"REMOVIDA_PELO_USUARIO_RECEBEDOR\"` (não existe DELETE na API Pix v2)\n- **Criar CobV**: use PUT `/pix/cobv/{txid}` (não existe POST `/cobv` na API Pix v2)\n- **Extrato homologação**: agência `1505`, conta `1348`, datas `19.04.2023` a `23.04.2023`\n- **Extrato page-size**: omitir parâmetro (BB usa 120) ou informar entre `30` e `120`\n- **PIX Cob/CobV (criar)**: a `pixKey` precisa estar registrada na conta vinculada às credenciais; caso contrário o BB retorna 400 `code 305` (chave não localizada)\n- **Listar boletos**: exige `numeroConvenio` + `agenciaBeneficiario` + `contaBeneficiario`\n- **Pix do boleto (consultar/gerar/cancelar)**: exige `numeroConvenio`\n\n---\n\n## Ordem sugerida\n\n1. **Autenticação** → Gerar Token (opcional, valida OAuth)\n2. **PIX Cob** → Criar Cob → Consultar → Listar\n3. **PIX CobV** → Criar CobV (PUT) → Consultar\n4. **Extrato** → Consultar Extrato\n5. **Cobrança** → Registrar Boleto → Pix do Boleto",
+    "description": "Collection para testar a aplicação **BBDeveloper** (Spring Boot) em `http://localhost:8080`.\n\nA aplicação obtém token OAuth2 + mTLS internamente — **não envie Authorization** nas requisições locais.\n\nOs endpoints locais espelham a **API Pix v2** (BACEN/BB) e a **API Cobranças v2** (BB) — sem atalhos que não existem na documentação oficial.\n\n**Webhook Pix:** não implementado nesta API — será tratado separadamente no **Oracle APEX**.\n\n---\n\n## Como importar\n\n1. Postman → **Import** → `postman/BBDeveloper.postman_collection.json`\n2. (Opcional) Importe também `postman/BBDeveloper.local.postman_environment.json` e selecione o environment **BBDeveloper - Local**\n3. Suba a aplicação Spring Boot antes de testar\n\n---\n\n## Variáveis\n\n| Variável | Descrição |\n|----------|------------|\n| `baseUrl` | URL local (padrão: http://localhost:8080) |\n| `pixKey` | Chave PIX — **deve estar registrada na conta do seu app** |\n| `txid` / `txidCobv` | Gerados e salvos automaticamente |\n| `e2eid` | EndToEndId de Pix recebido (salvo ao listar) |\n| `devolucaoId` | ID da devolução (gerado ao solicitar) |\n| `inicio` / `fim` | Listagem PIX — atualizados automaticamente (últimos 3 dias) |\n| `dataVencimentoCobv` | Vencimento CobV (+30 dias, automático) |\n| `agencia` / `conta` | Extrato homologação: 1505 / 1348 |\n| `dataInicio` / `dataFim` | Extrato — dd.MM.yyyy (homologação: 19.04.2023–23.04.2023) |\n| `numeroConvenio` | Convênio de boletos (homolog: 3128557) |\n| `agenciaBeneficiario` / `contaBeneficiario` | Beneficiário do convênio p/ listar boletos (homolog: 452 / 123873) |\n| `numeroBoleto` | Salvo após registrar boleto |\n\n---\n\n## Regras BB\n\n- **txid**: 26–35 caracteres alfanuméricos `[a-zA-Z0-9]`\n- **e2eid**: 32 caracteres, padrão EndToEndId (inicia com `E`)\n- **Listagem PIX**: intervalo `inicio`–`fim` menor que 5 dias\n- **Cancelar Cob/CobV**: use PATCH com `\"status\": \"REMOVIDA_PELO_USUARIO_RECEBEDOR\"` (não existe DELETE na API Pix v2)\n- **Criar CobV**: use PUT `/pix/cobv/{txid}` (não existe POST `/cobv` na API Pix v2)\n- **Extrato homologação**: agência `1505`, conta `1348`, datas `19.04.2023` a `23.04.2023`\n- **Extrato page-size**: omitir parâmetro (BB usa 120) ou informar entre `30` e `120`\n- **PIX Cob/CobV (criar)**: a `pixKey` precisa estar registrada na conta vinculada às credenciais; caso contrário o BB retorna 400 `code 305` (chave não localizada)\n- **Listar boletos**: exige `numeroConvenio` + `agenciaBeneficiario` + `contaBeneficiario`\n- **Consultar/alterar/baixar boleto**: exige `numeroConvenio`\n- **Cancelar boleto**: BB usa `POST /boletos/{id}/baixar` — o endpoint local `/cancelar` repassa para `/baixar`\n- **Pix do boleto (consultar/gerar/cancelar)**: exige `numeroConvenio`\n\n---\n\n## Ordem sugerida\n\n1. **Autenticação** → Gerar Token (opcional, valida OAuth)\n2. **PIX Cob** → Criar Cob → Consultar → Listar\n3. **PIX Recebidos** → Listar → Consultar por e2eid\n4. **PIX CobV** → Criar CobV (PUT) → Consultar\n5. **Extrato** → Consultar Extrato\n6. **Cobrança** → Registrar Boleto → Consultar → Pix do Boleto",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "event": [
@@ -40,7 +40,9 @@
     { "key": "numeroConvenio", "value": "3128557" },
     { "key": "agenciaBeneficiario", "value": "452" },
     { "key": "contaBeneficiario", "value": "123873" },
-    { "key": "numeroBoleto", "value": "" }
+    { "key": "numeroBoleto", "value": "" },
+    { "key": "e2eid", "value": "" },
+    { "key": "devolucaoId", "value": "" }
   ],
   "item": [
     {
@@ -313,7 +315,103 @@
       ]
     },
     {
-      "name": "04 - Extrato",
+      "name": "04 - PIX Recebidos (Conciliação)",
+      "item": [
+        {
+          "name": "Listar Pix Recebidos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const b = pm.response.json();",
+                  "    if (b.pix && b.pix.length > 0 && b.pix[0].endToEndId) {",
+                  "        pm.collectionVariables.set('e2eid', b.pix[0].endToEndId);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pix?inicio={{inicio}}&fim={{fim}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["pix"],
+              "query": [
+                { "key": "inicio", "value": "{{inicio}}" },
+                { "key": "fim", "value": "{{fim}}" },
+                { "key": "txid", "value": "", "disabled": true },
+                { "key": "txIdPresente", "value": "true", "disabled": true },
+                { "key": "devolucaoPresente", "value": "false", "disabled": true },
+                { "key": "cpf", "value": "", "disabled": true },
+                { "key": "cnpj", "value": "", "disabled": true },
+                { "key": "paginaAtual", "value": "0", "disabled": true },
+                { "key": "itensPorPagina", "value": "10", "disabled": true }
+              ]
+            },
+            "description": "Lista Pix recebidos (conciliação). Intervalo inicio–fim menor que 5 dias."
+          },
+          "response": []
+        },
+        {
+          "name": "Consultar Pix Recebido por e2eid",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/pix/{{e2eid}}",
+            "description": "Detalhe de um pagamento recebido. Informe `e2eid` (salvo ao listar ou de um pagamento real)."
+          },
+          "response": []
+        },
+        {
+          "name": "Solicitar Devolução",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const atual = pm.collectionVariables.get('devolucaoId');",
+                  "if (!atual || !/^[a-zA-Z0-9]{1,35}$/.test(atual)) {",
+                  "    const c = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';",
+                  "    let t = '';",
+                  "    for (let i = 0; i < 26; i++) t += c.charAt(Math.floor(Math.random() * c.length));",
+                  "    pm.collectionVariables.set('devolucaoId', t);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"valor\": \"1.00\"\n}"
+            },
+            "url": "{{baseUrl}}/pix/{{e2eid}}/devolucao/{{devolucaoId}}",
+            "description": "Solicita devolução de Pix recebido. Requer `e2eid` válido e valor ≤ valor original."
+          },
+          "response": []
+        },
+        {
+          "name": "Consultar Devolução",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/pix/{{e2eid}}/devolucao/{{devolucaoId}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05 - Extrato",
       "item": [
         {
           "name": "Consultar Extrato",
@@ -378,7 +476,7 @@
       ]
     },
     {
-      "name": "05 - Cobrança (Boletos)",
+      "name": "06 - Cobrança (Boletos)",
       "item": [
         {
           "name": "Listar Boletos",
@@ -432,6 +530,71 @@
                 { "key": "comPix", "value": "true" }
               ]
             }
+          },
+          "response": []
+        },
+        {
+          "name": "Consultar Boleto",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cobranca/boletos/{{numeroBoleto}}?numeroConvenio={{numeroConvenio}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["cobranca", "boletos", "{{numeroBoleto}}"],
+              "query": [
+                { "key": "numeroConvenio", "value": "{{numeroConvenio}}", "description": "Obrigatório" }
+              ]
+            },
+            "description": "Consulta situação, linha digitável e demais dados do boleto."
+          },
+          "response": []
+        },
+        {
+          "name": "Alterar Boleto (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numeroConvenio\": {{numeroConvenio}},\n  \"indicadorNovaDataVencimento\": \"S\",\n  \"alteracaoData\": {\n    \"novaDataVencimento\": \"31.12.2026\"\n  }\n}"
+            },
+            "url": "{{baseUrl}}/cobranca/boletos/{{numeroBoleto}}",
+            "description": "Altera boleto registrado (ex.: vencimento, valor, desconto). Envie apenas os campos desejados."
+          },
+          "response": []
+        },
+        {
+          "name": "Baixar Boleto",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cobranca/boletos/{{numeroBoleto}}/baixar?numeroConvenio={{numeroConvenio}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["cobranca", "boletos", "{{numeroBoleto}}", "baixar"],
+              "query": [
+                { "key": "numeroConvenio", "value": "{{numeroConvenio}}", "description": "Obrigatório" }
+              ]
+            },
+            "description": "Solicita baixa do título (irreversível). BB pode exigir ~30 min após o registro."
+          },
+          "response": []
+        },
+        {
+          "name": "Cancelar Boleto",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cobranca/boletos/{{numeroBoleto}}/cancelar?numeroConvenio={{numeroConvenio}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["cobranca", "boletos", "{{numeroBoleto}}", "cancelar"],
+              "query": [
+                { "key": "numeroConvenio", "value": "{{numeroConvenio}}", "description": "Obrigatório" }
+              ]
+            },
+            "description": "Alias local para cancelamento — repassa para `POST /boletos/{id}/baixar` do BB (não existe `/cancelar` na API Cobranças v2)."
           },
           "response": []
         },

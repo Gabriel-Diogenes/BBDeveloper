@@ -2,7 +2,10 @@ package br.com.intercomex.api_BBDeveloper.BBDeveloper.service;
 
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.client.cobranca.CobrancaApiClient;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.auth.TokenResponseDTO;
+import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.request.BoletoAlterarRequestDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.request.BoletoRegistrarRequestDTO;
+import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.response.BoletoBaixaResponseDTO;
+import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.response.BoletoConsultaResponseDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.response.BoletoListaResponseDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.response.BoletoPixResponseDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.response.BoletoResponseDTO;
@@ -95,6 +98,26 @@ public class CobrancaService {
         );
 
         return cobrancaApiClient.registrarBoleto(bearer(), request);
+    }
+
+    public BoletoConsultaResponseDTO consultarBoleto(String numeroBoleto, Integer numeroConvenio) {
+        log.debug("Consultando boleto: {} (convênio: {})", numeroBoleto, numeroConvenio);
+        return cobrancaApiClient.consultarBoleto(bearer(), numeroBoleto, numeroConvenio);
+    }
+
+    public BoletoResponseDTO alterarBoleto(String numeroBoleto, BoletoAlterarRequestDTO request) {
+        log.debug("Alterando boleto: {} (convênio: {})", numeroBoleto, request.numeroConvenio());
+        return cobrancaApiClient.alterarBoleto(bearer(), numeroBoleto, request);
+    }
+
+    public BoletoBaixaResponseDTO baixarBoleto(String numeroBoleto, Integer numeroConvenio) {
+        log.debug("Baixando boleto: {} (convênio: {})", numeroBoleto, numeroConvenio);
+        return cobrancaApiClient.baixarBoleto(bearer(), numeroBoleto, numeroConvenio);
+    }
+
+    public BoletoBaixaResponseDTO cancelarBoleto(String numeroBoleto, Integer numeroConvenio) {
+        log.debug("Cancelando boleto: {} (convênio: {}) — BB usa endpoint /baixar", numeroBoleto, numeroConvenio);
+        return cobrancaApiClient.baixarBoleto(bearer(), numeroBoleto, numeroConvenio);
     }
 
     public BoletoPixResponseDTO consultarPixBoleto(String numeroBoleto, Integer numeroConvenio) {

@@ -8,6 +8,8 @@ import java.util.regex.Pattern;
 public class PixUtil {
 
     private static final Pattern TXID_PATTERN = Pattern.compile("^[a-zA-Z0-9]{26,35}$");
+    private static final Pattern E2EID_PATTERN = Pattern.compile("^E[a-zA-Z0-9]{31}$");
+    private static final Pattern DEVOLUCAO_ID_PATTERN = Pattern.compile("^[a-zA-Z0-9]{1,35}$");
     private static final int PERIODO_MAXIMO_LISTAGEM_DIAS = 4;
 
     private PixUtil() {
@@ -24,6 +26,20 @@ public class PixUtil {
             throw new IllegalArgumentException(
                     "txid inválido: deve conter de 26 a 35 caracteres alfanuméricos [a-zA-Z0-9]. " +
                             "Exemplo: " + gerarTxid());
+        }
+    }
+
+    public static void validarE2eid(String e2eid) {
+        if (e2eid == null || !E2EID_PATTERN.matcher(e2eid).matches()) {
+            throw new IllegalArgumentException(
+                    "e2eid inválido: deve conter 32 caracteres alfanuméricos iniciando com E.");
+        }
+    }
+
+    public static void validarDevolucaoId(String id) {
+        if (id == null || !DEVOLUCAO_ID_PATTERN.matcher(id).matches()) {
+            throw new IllegalArgumentException(
+                    "id de devolução inválido: deve conter de 1 a 35 caracteres alfanuméricos [a-zA-Z0-9].");
         }
     }
 
