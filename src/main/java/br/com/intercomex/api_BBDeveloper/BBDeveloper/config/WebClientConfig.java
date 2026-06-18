@@ -13,10 +13,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.transport.logging.AdvancedByteBufFormat;
 
+import javax.net.ssl.KeyManagerFactory;
 import java.io.InputStream;
 import java.security.KeyStore;
-
-import javax.net.ssl.KeyManagerFactory;
 
 @Configuration
 @RequiredArgsConstructor
@@ -25,23 +24,36 @@ public class WebClientConfig {
     private final BBApiProperties properties;
 
     @Bean
-    public WebClient bbWebClient() throws Exception {
+    public WebClient bbWebClient() {
+        HttpClient httpClient = HttpClient.create();
 
+        if (properties.isWiretapEnabled()) {
+            httpClient = httpClient.wiretap(
+                    "reactor.netty.http.client.HttpClient",
+                    LogLevel.DEBUG,
+                    AdvancedByteBufFormat.TEXTUAL);
+        }
+
+        return WebClient.builder()
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
+                .build();
+    }
+
+    @Bean
+    public WebClient bbMtlsWebClient() throws Exception {
         KeyStore keyStore = KeyStore.getInstance("PKCS12");
 
         InputStream keyStoreStream =
-                new ClassPathResource(properties.getSslCertPath())
-                        .getInputStream();
+                new ClassPathResource(properties.getSslCertPath()).getInputStream();
 
         keyStore.load(
                 keyStoreStream,
                 properties.getSslCertPassword().toCharArray()
         );
 
-        KeyManagerFactory kmf =
-                KeyManagerFactory.getInstance(
-                        KeyManagerFactory.getDefaultAlgorithm()
-                );
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance(
+                KeyManagerFactory.getDefaultAlgorithm()
+        );
 
         kmf.init(
                 keyStore,
@@ -64,9 +76,7 @@ public class WebClientConfig {
         }
 
         return WebClient.builder()
-                .clientConnector(
-                        new ReactorClientHttpConnector(httpClient)
-                )
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .build();
     }
 }

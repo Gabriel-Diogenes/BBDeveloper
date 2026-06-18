@@ -1,8 +1,10 @@
 package br.com.intercomex.api_BBDeveloper.BBDeveloper.client.support;
 
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.properties.BBApiProperties;
+import br.com.intercomex.api_BBDeveloper.BBDeveloper.exception.BBApiException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -30,15 +32,33 @@ public abstract class BBClientSupport {
 
     protected Function<ClientResponse, Mono<? extends Throwable>> errorHandler(String api, String operacao) {
         return response -> response.bodyToMono(String.class).flatMap(body -> {
+            HttpStatus status = HttpStatus.resolve(response.statusCode().value());
+            if (status == null) {
+                status = HttpStatus.INTERNAL_SERVER_ERROR;
+            }
             log.error("Erro {} BB ({}) — Status: {} Body: {}", api, operacao, response.statusCode(), body);
-            return Mono.error(new RuntimeException("Erro BB API " + api + ": " + body));
+            return Mono.error(new BBApiException(
+                    "Erro BB API " + api + ": " + body,
+                    status,
+                    api,
+                    operacao,
+                    body));
         });
     }
 
     protected Function<ClientResponse, Mono<? extends Throwable>> oauthErrorHandler() {
         return response -> response.bodyToMono(String.class).flatMap(body -> {
+            HttpStatus status = HttpStatus.resolve(response.statusCode().value());
+            if (status == null) {
+                status = HttpStatus.INTERNAL_SERVER_ERROR;
+            }
             log.error("Erro OAuth BB — Status: {} Body: {}", response.statusCode(), body);
-            return Mono.error(new RuntimeException("Erro BB OAuth: " + body));
+            return Mono.error(new BBApiException(
+                    "Erro BB OAuth: " + body,
+                    status,
+                    "OAuth",
+                    "obter token",
+                    body));
         });
     }
 

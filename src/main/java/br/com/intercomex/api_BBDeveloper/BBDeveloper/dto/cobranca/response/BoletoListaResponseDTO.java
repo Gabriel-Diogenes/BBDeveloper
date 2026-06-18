@@ -6,9 +6,9 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record BoletoListaResponseDTO(
-        Integer indicadorContinuidade,
+        String indicadorContinuidade,
         Integer quantidadeItensPorPagina,
         Integer quantidadeTotalItens,
-        List<BoletoResponseDTO> boletos
+        List<BoletoListItemDTO> boletos
 ) {
 }

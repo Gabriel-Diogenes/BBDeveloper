@@ -6,6 +6,7 @@ import br.com.intercomex.api_BBDeveloper.BBDeveloper.properties.BBApiProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -17,7 +18,7 @@ import java.util.Base64;
 @Component
 public class BBOAuthClient extends BBClientSupport {
 
-    public BBOAuthClient(BBApiProperties properties, WebClient bbWebClient) {
+    public BBOAuthClient(BBApiProperties properties, @Qualifier("bbWebClient") WebClient bbWebClient) {
         super(properties, bbWebClient);
     }
 

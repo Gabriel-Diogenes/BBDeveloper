@@ -4,6 +4,7 @@ import br.com.intercomex.api_BBDeveloper.BBDeveloper.client.support.BBClientSupp
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.extrato.response.ExtratoResponseDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.properties.BBApiProperties;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -18,7 +19,7 @@ public class ExtratoApiClient extends BBClientSupport {
     private static final int QUANTIDADE_POR_PAGINA_MINIMA = 30;
     private static final int QUANTIDADE_POR_PAGINA_MAXIMA = 120;
 
-    public ExtratoApiClient(BBApiProperties properties, WebClient bbWebClient) {
+    public ExtratoApiClient(BBApiProperties properties, @Qualifier("bbMtlsWebClient") WebClient bbWebClient) {
         super(properties, bbWebClient);
     }
 

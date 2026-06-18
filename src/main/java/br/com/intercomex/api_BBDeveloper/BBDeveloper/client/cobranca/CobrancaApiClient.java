@@ -1,6 +1,7 @@
 package br.com.intercomex.api_BBDeveloper.BBDeveloper.client.cobranca;
 
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.client.support.BBClientSupport;
+import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.request.BoletoPixOperacaoRequestDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.request.BoletoRegistrarRequestDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.response.BoletoListaResponseDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.response.BoletoPixResponseDTO;
@@ -9,6 +10,7 @@ import br.com.intercomex.api_BBDeveloper.BBDeveloper.properties.BBApiProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -19,7 +21,7 @@ public class CobrancaApiClient extends BBClientSupport {
 
     private static final String API = "Cobrança";
 
-    public CobrancaApiClient(BBApiProperties properties, WebClient bbWebClient) {
+    public CobrancaApiClient(BBApiProperties properties, @Qualifier("bbWebClient") WebClient bbWebClient) {
         super(properties, bbWebClient);
     }
 
@@ -85,10 +87,11 @@ public class CobrancaApiClient extends BBClientSupport {
         log.info("Gerando Pix para boleto: {} (convênio: {})", numeroBoleto, numeroConvenio);
 
         return bbWebClient.post()
-                .uri(boletoPixUri(numeroBoleto, numeroConvenio))
+                .uri(boletoPixOperacaoUri(numeroBoleto, numeroConvenio, "gerar-pix"))
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue("{}")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(new BoletoPixOperacaoRequestDTO(numeroConvenio))
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, errorHandler(API, "gerar Pix boleto"))
                 .bodyToMono(BoletoPixResponseDTO.class)
@@ -99,9 +102,11 @@ public class CobrancaApiClient extends BBClientSupport {
     public void cancelarPixBoleto(String token, String numeroBoleto, Integer numeroConvenio) {
         log.info("Cancelando Pix do boleto: {} (convênio: {})", numeroBoleto, numeroConvenio);
 
-        bbWebClient.delete()
-                .uri(boletoPixUri(numeroBoleto, numeroConvenio))
+        bbWebClient.post()
+                .uri(boletoPixOperacaoUri(numeroBoleto, numeroConvenio, "cancelar-pix"))
                 .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(new BoletoPixOperacaoRequestDTO(numeroConvenio))
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, errorHandler(API, "cancelar Pix boleto"))
                 .bodyToMono(Void.class)
@@ -112,6 +117,15 @@ public class CobrancaApiClient extends BBClientSupport {
     private String boletoPixUri(String numeroBoleto, Integer numeroConvenio) {
         return UriComponentsBuilder
                 .fromUriString(properties.getCobrancaBaseUrl() + "/boletos/" + numeroBoleto + "/pix")
+                .queryParam("gw-dev-app-key", properties.getDeveloperKey())
+                .queryParam("numeroConvenio", numeroConvenio)
+                .build()
+                .toUriString();
+    }
+
+    private String boletoPixOperacaoUri(String numeroBoleto, Integer numeroConvenio, String operacao) {
+        return UriComponentsBuilder
+                .fromUriString(properties.getCobrancaBaseUrl() + "/boletos/" + numeroBoleto + "/" + operacao)
                 .queryParam("gw-dev-app-key", properties.getDeveloperKey())
                 .queryParam("numeroConvenio", numeroConvenio)
                 .build()

@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import br.com.intercomex.api_BBDeveloper.BBDeveloper.util.ExtratoUtil;
+
 import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -34,8 +36,11 @@ public class CobrancaService {
         String dataInicio = LocalDate.now().minusDays(30).format(DATA_FORMATTER);
         String dataFim = LocalDate.now().plusDays(30).format(DATA_FORMATTER);
 
+        String agencia = ExtratoUtil.formatarAgencia(agenciaBeneficiario);
+        String conta = ExtratoUtil.formatarConta(contaBeneficiario);
+
         return cobrancaApiClient.listarBoletos(
-                bearer(), numeroConvenio, agenciaBeneficiario, contaBeneficiario, dataInicio, dataFim);
+                bearer(), numeroConvenio, agencia, conta, dataInicio, dataFim);
     }
 
     public BoletoResponseDTO registrarBoleto(

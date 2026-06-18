@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="BbDeveloperApplication" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="br.com.intercomex.api_BBDeveloper.BBDeveloper.BbDeveloperApplication" />
+    <module name="BBDeveloper" />
+    <option name="PROGRAM_PARAMETERS" value="--spring.profiles.active=producao" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="br.com.intercomex.api_BBDeveloper.BBDeveloper.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

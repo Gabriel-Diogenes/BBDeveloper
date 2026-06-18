@@ -11,6 +11,7 @@ import br.com.intercomex.api_BBDeveloper.BBDeveloper.properties.BBApiProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -23,8 +24,11 @@ public class PixApiClient extends BBClientSupport {
 
     private static final String API = "Pix";
 
-    public PixApiClient(BBApiProperties properties, WebClient bbWebClient) {
-        super(properties, bbWebClient);
+    public PixApiClient(
+            BBApiProperties properties,
+            @Qualifier("bbWebClient") WebClient bbWebClient,
+            @Qualifier("bbMtlsWebClient") WebClient bbMtlsWebClient) {
+        super(properties, properties.isPixRequerMtls() ? bbMtlsWebClient : bbWebClient);
     }
 
     public PixCobrancaImediataDTO criarCob(String txid, PixCobrancaRequestDTO request, String token) {

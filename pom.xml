@@ -11,8 +11,8 @@
 	<groupId>br.com.intercomex.api-BBDeveloper</groupId>
 	<artifactId>BBDeveloper</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
+	<name>BBDeveloper</name>
+	<description>Proxy API BB Developers</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -64,6 +64,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
+					<mainClass>br.com.intercomex.api_BBDeveloper.BBDeveloper.BbDeveloperApplication</mainClass>
 					<excludes>
 						<exclude>
 							<groupId>org.projectlombok</groupId>
