@@ -1,8 +1,27 @@
 HELP.md
 target/
+*.class
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+
+# Segredos, certificados e ambiente local
+**/application-secrets.properties
+!**/application-secrets.properties.example
+.env
+.env.*
+!.env.example
+*.pfx
+*.p12
+*.pem
+*.key
+*.jks
+secrets/
+config/application-secrets.properties
+
+src/main/resources/certificados/
+deploy/config/application-secrets.properties
+
 
 ### STS ###
 .apt_generated

@@ -1,0 +1,6 @@
+# Ativa os hooks de seguranca deste repositorio (executar uma vez por clone):
+#   git config core.hooksPath .githooks
+#
+# No Windows, se o hook nao rodar, garanta Git Bash instalado ou execute:
+#   git config core.hooksPath .githooks
+#   icacls .githooks\pre-commit /grant Everyone:RX
