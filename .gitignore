@@ -34,16 +34,7 @@ deploy/config/application-secrets.properties
 .sts4-cache
 
 ### IntelliJ IDEA ###
-.idea/*
-!.idea/runConfigurations/
-!.idea/misc.xml
-!.idea/modules.xml
-!.idea/compiler.xml
-!.idea/encodings.xml
-!.idea/.name
-*.iws
-*.iml
-*.ipr
+.idea
 
 ### NetBeans ###
 /nbproject/private/

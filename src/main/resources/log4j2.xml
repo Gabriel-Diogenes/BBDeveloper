@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration packages="pl.tkowalcz.tjahzi.log4j2" shutdownHook="enable">
+    <Loggers>
+        <Logger name="br.com.intercomex" level="DEBUG" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="Loki"/>
+        </Logger>
+
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="Loki"/>
+        </Root>
+    </Loggers>
+
+    <appenders>
+        <Loki name="Loki" bufferSizeMegabytes="64">
+            <host>${env:LOKI_HOST:-172.19.132.6}</host>
+            <port>${env:LOKI_PORT:-3100}</port>
+
+            <ThresholdFilter level="${env:LOG_LEVEL:-INFO}" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout>
+                <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %class{36}.%-22method : %msg%n</Pattern>
+            </PatternLayout>
+
+            <Label name="VM" value="${env:LOKI_VM:-W7-1}"/>
+            <label name="application" value="BBDeveloper"/>
+
+            <LogLevelLabel>level</LogLevelLabel>
+        </Loki>
+
+        <Console name="Console" target="SYSTEM_OUT">
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout>
+                <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %class{36}.%-22method : %msg%n</Pattern>
+            </PatternLayout>
+        </Console>
+    </appenders>
+</configuration>

@@ -310,16 +310,31 @@ Artefato: `target/BBDeveloper-0.0.1-SNAPSHOT.jar`
 
 ### Servidor
 
-1. Copie o JAR para o servidor
+1. Copie o JAR para `C:\api\bbdeveloper\`
 2. Configure secrets em `config/application-secrets.properties` (modelo em `deploy/config/application-secrets.properties.example`)
 3. Coloque o certificado PFX no caminho indicado nas secrets
-4. Execute:
+4. Copie `deploy/executa-bbdeveloper.bat` para `C:\api\bbdeveloper\` e execute no servidor
+
+Ou manualmente:
 
 ```bash
 java "-Dspring.profiles.active=producao" -jar BBDeveloper-0.0.1-SNAPSHOT.jar
 ```
 
-Ou defina `SPRING_PROFILES_ACTIVE=producao`.
+Verifique saúde: `GET http://localhost:8080/actuator/health`
+
+### Logs (Log4j2 + Grafana Loki)
+
+Mesmo padrão dos robôs (`TRACK_CNTR`): logs no console e enviados ao Loki via `log4j2.xml`.
+
+| Variável | Padrão | Descrição |
+|----------|--------|-----------|
+| `LOKI_HOST` | `172.19.132.6` | Host do Loki |
+| `LOKI_PORT` | `3100` | Porta do Loki |
+| `LOKI_VM` | `W7-1` | Label `VM` no Grafana |
+| `LOG_LEVEL` | `INFO` | Nível mínimo enviado ao Loki |
+
+No Grafana, filtre por `application="BBDeveloper"`.
 
 ### Checklist produção
 
