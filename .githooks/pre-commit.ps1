@@ -27,7 +27,9 @@ foreach ($file in $staged) {
 }
 
 $diff = git diff --cached -U0 --no-color
-if ($diff -match '(?im)^\+.*(client-secret|ssl-cert-password|developer-key=|BEGIN (RSA |EC )?PRIVATE KEY)') {
+$diffWithoutExamples = ($diff -split "`n" | Where-Object { $_ -notmatch 'application-secrets\.properties\.example|\.env\.example' }) -join "`n"
+
+if ($diffWithoutExamples -match '(?im)^\+.*(client-secret|ssl-cert-password|developer-key=|BEGIN (RSA |EC )?PRIVATE KEY)') {
     Write-Host ""
     Write-Host "[PRE-COMMIT] BLOQUEADO: possivel segredo no conteudo do commit." -ForegroundColor Red
     Write-Host "Use application-secrets.properties ou variaveis de ambiente."
@@ -35,7 +37,7 @@ if ($diff -match '(?im)^\+.*(client-secret|ssl-cert-password|developer-key=|BEGI
     exit 1
 }
 
-if ($diff -match '(?m)^\+bb\.(homolog|producao)\.(client-secret|client-id)=[^\s]{20,}') {
+if ($diffWithoutExamples -match '(?m)^\+bb\.(homolog|producao)\.(client-secret|client-id)=[^\s]{20,}') {
     Write-Host ""
     Write-Host "[PRE-COMMIT] BLOQUEADO: credencial BB em arquivo versionado." -ForegroundColor Red
     Write-Host "Mova para application-secrets.properties"
