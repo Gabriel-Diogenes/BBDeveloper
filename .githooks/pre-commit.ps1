@@ -43,5 +43,10 @@ if ($diffContent -match '(?im)^\+.*bb\.(homolog|producao)\.(client-secret|ssl-ce
 }
 
 if ($diffContent -match '(?im)^\+.*BEGIN (RSA |EC )?PRIVATE KEY') {
+    Write-Host ""
+    Write-Host "[PRE-COMMIT] BLOQUEADO: chave privada no commit." -ForegroundColor Red
+    Write-Host ""
+    exit 1
+}
 
 exit 0
