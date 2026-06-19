@@ -31,6 +31,8 @@ public class BBApiProperties {
     private String scope;
     private boolean wiretapEnabled;
     private boolean pixRequerMtls;
+    private int connectTimeoutMs = 15_000;
+    private int readTimeoutMs = 45_000;
 
     public BBApiProperties(Environment environment) {
         this.environment = environment;

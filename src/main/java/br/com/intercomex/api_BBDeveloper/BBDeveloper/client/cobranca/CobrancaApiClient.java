@@ -28,7 +28,7 @@ public class CobrancaApiClient extends BBClientSupport {
         super(properties, bbWebClient);
     }
 
-    public BoletoListaResponseDTO listarBoletos(String token, Integer numeroConvenio,
+    public BoletoListaResponseDTO listarBoletos(Integer numeroConvenio,
                                                 String agenciaBeneficiario, String contaBeneficiario,
                                                 String dataInicio, String dataFim) {
         log.info("Listando boletos — convênio: {}, agência: {}, conta: {}, período: {} a {}",
@@ -47,7 +47,6 @@ public class CobrancaApiClient extends BBClientSupport {
 
         return bbWebClient.get()
                 .uri(uri)
-                .header("Authorization", "Bearer " + token)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, errorHandler(API, "listar boletos"))
@@ -56,12 +55,11 @@ public class CobrancaApiClient extends BBClientSupport {
                 .block();
     }
 
-    public BoletoResponseDTO registrarBoleto(String token, BoletoRegistrarRequestDTO request) {
+    public BoletoResponseDTO registrarBoleto(BoletoRegistrarRequestDTO request) {
         log.info("Registrando boleto — convênio: {}, valor: {}", request.numeroConvenio(), request.valorOriginal());
 
         return bbWebClient.post()
                 .uri(cobrancaUri("/boletos"))
-                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
@@ -72,12 +70,11 @@ public class CobrancaApiClient extends BBClientSupport {
                 .block();
     }
 
-    public BoletoPixResponseDTO consultarPixBoleto(String token, String numeroBoleto, Integer numeroConvenio) {
+    public BoletoPixResponseDTO consultarPixBoleto(String numeroBoleto, Integer numeroConvenio) {
         log.info("Consultando Pix do boleto: {} (convênio: {})", numeroBoleto, numeroConvenio);
 
         return bbWebClient.get()
                 .uri(boletoPixUri(numeroBoleto, numeroConvenio))
-                .header("Authorization", "Bearer " + token)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, errorHandler(API, "consultar Pix boleto"))
@@ -86,12 +83,11 @@ public class CobrancaApiClient extends BBClientSupport {
                 .block();
     }
 
-    public BoletoPixResponseDTO gerarPixBoleto(String token, String numeroBoleto, Integer numeroConvenio) {
+    public BoletoPixResponseDTO gerarPixBoleto(String numeroBoleto, Integer numeroConvenio) {
         log.info("Gerando Pix para boleto: {} (convênio: {})", numeroBoleto, numeroConvenio);
 
         return bbWebClient.post()
                 .uri(boletoPixOperacaoUri(numeroBoleto, numeroConvenio, "gerar-pix"))
-                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(new BoletoPixOperacaoRequestDTO(numeroConvenio))
@@ -102,12 +98,11 @@ public class CobrancaApiClient extends BBClientSupport {
                 .block();
     }
 
-    public BoletoConsultaResponseDTO consultarBoleto(String token, String numeroBoleto, Integer numeroConvenio) {
+    public BoletoConsultaResponseDTO consultarBoleto(String numeroBoleto, Integer numeroConvenio) {
         log.info("Consultando boleto: {} (convênio: {})", numeroBoleto, numeroConvenio);
 
         BoletoConsultaResponseDTO resposta = bbWebClient.get()
                 .uri(boletoOperacaoUri(numeroBoleto, numeroConvenio))
-                .header("Authorization", "Bearer " + token)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, errorHandler(API, "consultar boleto"))
@@ -144,12 +139,11 @@ public class CobrancaApiClient extends BBClientSupport {
     }
 
     public BoletoResponseDTO alterarBoleto(
-            String token, String numeroBoleto, BoletoAlterarRequestDTO request) {
+            String numeroBoleto, BoletoAlterarRequestDTO request) {
         log.info("Alterando boleto: {} (convênio: {})", numeroBoleto, request.numeroConvenio());
 
         return bbWebClient.patch()
                 .uri(cobrancaUri("/boletos/" + numeroBoleto))
-                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
@@ -160,12 +154,11 @@ public class CobrancaApiClient extends BBClientSupport {
                 .block();
     }
 
-    public BoletoBaixaResponseDTO baixarBoleto(String token, String numeroBoleto, Integer numeroConvenio) {
+    public BoletoBaixaResponseDTO baixarBoleto(String numeroBoleto, Integer numeroConvenio) {
         log.info("Baixando boleto: {} (convênio: {})", numeroBoleto, numeroConvenio);
 
         return bbWebClient.post()
                 .uri(cobrancaUri("/boletos/" + numeroBoleto + "/baixar"))
-                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(new BoletoPixOperacaoRequestDTO(numeroConvenio))
@@ -176,12 +169,11 @@ public class CobrancaApiClient extends BBClientSupport {
                 .block();
     }
 
-    public void cancelarPixBoleto(String token, String numeroBoleto, Integer numeroConvenio) {
+    public void cancelarPixBoleto(String numeroBoleto, Integer numeroConvenio) {
         log.info("Cancelando Pix do boleto: {} (convênio: {})", numeroBoleto, numeroConvenio);
 
         bbWebClient.post()
                 .uri(boletoPixOperacaoUri(numeroBoleto, numeroConvenio, "cancelar-pix"))
-                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(new BoletoPixOperacaoRequestDTO(numeroConvenio))
                 .retrieve()

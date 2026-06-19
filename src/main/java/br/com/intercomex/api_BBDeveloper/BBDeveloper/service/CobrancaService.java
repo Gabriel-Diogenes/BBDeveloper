@@ -1,7 +1,6 @@
 package br.com.intercomex.api_BBDeveloper.BBDeveloper.service;
 
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.client.cobranca.CobrancaApiClient;
-import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.auth.TokenResponseDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.request.BoletoAlterarRequestDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.request.BoletoRegistrarRequestDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.response.BoletoBaixaResponseDTO;
@@ -25,7 +24,6 @@ import java.time.format.DateTimeFormatter;
 public class CobrancaService {
 
     private final CobrancaApiClient cobrancaApiClient;
-    private final AuthService authService;
 
     private static final DateTimeFormatter DATA_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     private static final int CAMPO_UTILIZACAO_BENEFICIARIO_MAX_LENGTH = 25;
@@ -43,14 +41,14 @@ public class CobrancaService {
         String conta = ExtratoUtil.formatarConta(contaBeneficiario);
 
         return cobrancaApiClient.listarBoletos(
-                bearer(), numeroConvenio, agencia, conta, dataInicio, dataFim);
+                numeroConvenio, agencia, conta, dataInicio, dataFim);
     }
 
     public BoletoResponseDTO registrarBoleto(BoletoRegistrarRequestDTO request) {
         BoletoRegistrarRequestDTO normalizado = normalizarRegistro(request);
         log.debug("Registrando boleto — convênio: {}, valor: {}",
                 normalizado.numeroConvenio(), normalizado.valorOriginal());
-        return cobrancaApiClient.registrarBoleto(bearer(), normalizado);
+        return cobrancaApiClient.registrarBoleto(normalizado);
     }
 
     public BoletoResponseDTO registrarBoletoSimplificado(
@@ -109,45 +107,37 @@ public class CobrancaService {
 
     public BoletoConsultaResponseDTO consultarBoleto(String numeroBoleto, Integer numeroConvenio) {
         log.debug("Consultando boleto: {} (convênio: {})", numeroBoleto, numeroConvenio);
-        return cobrancaApiClient.consultarBoleto(bearer(), numeroBoleto, numeroConvenio);
+        return cobrancaApiClient.consultarBoleto(numeroBoleto, numeroConvenio);
     }
 
     public BoletoResponseDTO alterarBoleto(String numeroBoleto, BoletoAlterarRequestDTO request) {
         log.debug("Alterando boleto: {} (convênio: {})", numeroBoleto, request.numeroConvenio());
-        return cobrancaApiClient.alterarBoleto(bearer(), numeroBoleto, request);
+        return cobrancaApiClient.alterarBoleto(numeroBoleto, request);
     }
 
     public BoletoBaixaResponseDTO baixarBoleto(String numeroBoleto, Integer numeroConvenio) {
         log.debug("Baixando boleto: {} (convênio: {})", numeroBoleto, numeroConvenio);
-        return cobrancaApiClient.baixarBoleto(bearer(), numeroBoleto, numeroConvenio);
+        return cobrancaApiClient.baixarBoleto(numeroBoleto, numeroConvenio);
     }
 
     public BoletoBaixaResponseDTO cancelarBoleto(String numeroBoleto, Integer numeroConvenio) {
         log.debug("Cancelando boleto: {} (convênio: {}) — BB usa endpoint /baixar", numeroBoleto, numeroConvenio);
-        return cobrancaApiClient.baixarBoleto(bearer(), numeroBoleto, numeroConvenio);
+        return cobrancaApiClient.baixarBoleto(numeroBoleto, numeroConvenio);
     }
 
     public BoletoPixResponseDTO consultarPixBoleto(String numeroBoleto, Integer numeroConvenio) {
         log.debug("Consultando Pix do boleto: {} (convênio: {})", numeroBoleto, numeroConvenio);
-        return cobrancaApiClient.consultarPixBoleto(bearer(), numeroBoleto, numeroConvenio);
+        return cobrancaApiClient.consultarPixBoleto(numeroBoleto, numeroConvenio);
     }
 
     public BoletoPixResponseDTO gerarPixBoleto(String numeroBoleto, Integer numeroConvenio) {
         log.debug("Gerando Pix para boleto: {} (convênio: {})", numeroBoleto, numeroConvenio);
-        return cobrancaApiClient.gerarPixBoleto(bearer(), numeroBoleto, numeroConvenio);
+        return cobrancaApiClient.gerarPixBoleto(numeroBoleto, numeroConvenio);
     }
 
     public void cancelarPixBoleto(String numeroBoleto, Integer numeroConvenio) {
         log.debug("Cancelando Pix do boleto: {} (convênio: {})", numeroBoleto, numeroConvenio);
-        cobrancaApiClient.cancelarPixBoleto(bearer(), numeroBoleto, numeroConvenio);
-    }
-
-    private String bearer() {
-        TokenResponseDTO token = authService.gerarToken();
-        if (token.accessToken() == null) {
-            throw new IllegalStateException("Falha ao obter token de acesso");
-        }
-        return token.accessToken();
+        cobrancaApiClient.cancelarPixBoleto(numeroBoleto, numeroConvenio);
     }
 
     private BoletoRegistrarRequestDTO normalizarRegistro(BoletoRegistrarRequestDTO request) {

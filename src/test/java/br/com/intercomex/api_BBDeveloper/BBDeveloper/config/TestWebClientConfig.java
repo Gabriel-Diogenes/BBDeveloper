@@ -12,6 +12,12 @@ public class TestWebClientConfig {
 
     @Bean
     @Primary
+    public WebClient bbOAuthWebClient() {
+        return WebClient.builder().build();
+    }
+
+    @Bean
+    @Primary
     public WebClient bbWebClient() {
         return WebClient.builder().build();
     }

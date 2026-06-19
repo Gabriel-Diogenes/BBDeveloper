@@ -24,7 +24,6 @@ public class ExtratoApiClient extends BBClientSupport {
     }
 
     public ExtratoResponseDTO consultar(
-            String token,
             String agencia,
             String conta,
             String dataInicio,
@@ -52,7 +51,6 @@ public class ExtratoApiClient extends BBClientSupport {
 
         var request = bbWebClient.get()
                 .uri(uri)
-                .header("Authorization", "Bearer " + token)
                 .header("gw-dev-app-key", properties.getDeveloperKey())
                 .accept(MediaType.APPLICATION_JSON);
 
@@ -61,8 +59,8 @@ public class ExtratoApiClient extends BBClientSupport {
             request = request.header("x-br-com-bb-ipa-mciteste", mciHeader);
         }
 
-        log.info("Headers extrato — x-br-com-bb-ipa-mciteste: {}, gw-dev-app-key: {}, token(len): {}",
-                mciHeader, properties.getDeveloperKey(), token != null ? token.length() : 0);
+        log.info("Headers extrato — x-br-com-bb-ipa-mciteste: {}, gw-dev-app-key: {}",
+                mciHeader, properties.getDeveloperKey());
 
         return request.retrieve()
                 .onStatus(HttpStatusCode::isError, errorHandler(API, "consultar extrato"))

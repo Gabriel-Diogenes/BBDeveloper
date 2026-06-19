@@ -36,22 +36,37 @@ public class AuthService {
                 return atual.token();
             }
 
-            log.debug("Iniciando geração de token — scope: {}", properties.getScope());
-            TokenResponseDTO token = oauthClient.obterToken();
-
-            if (token == null || token.accessToken() == null) {
-                log.error("Falha crítica: token retornou null ou sem access_token");
-                throw new IllegalStateException("Falha ao obter token de acesso");
-            }
-
-            int ttl = token.expiresIn() != null ? token.expiresIn() : 600;
-            int segundosValidos = Math.max(TTL_MINIMO_SEGUNDOS, ttl - MARGEM_SEGURANCA_SEGUNDOS);
-            cachedToken = new CachedToken(token, Instant.now().plusSeconds(segundosValidos));
-
-            log.info("Token obtido e armazenado em cache por ~{}s — scope solicitado: {}, scope concedido: {}",
-                    segundosValidos, properties.getScope(), token.scope());
-            return token;
+            return obterNovoToken();
         }
+    }
+
+    public String getAccessToken() {
+        return gerarToken().accessToken();
+    }
+
+    public void invalidarToken() {
+        synchronized (cacheLock) {
+            cachedToken = null;
+            log.info("Cache de token OAuth invalidado");
+        }
+    }
+
+    private TokenResponseDTO obterNovoToken() {
+        log.debug("Iniciando geração de token — scope: {}", properties.getScope());
+        TokenResponseDTO token = oauthClient.obterToken();
+
+        if (token == null || token.accessToken() == null) {
+            log.error("Falha crítica: token retornou null ou sem access_token");
+            throw new IllegalStateException("Falha ao obter token de acesso");
+        }
+
+        int ttl = token.expiresIn() != null ? token.expiresIn() : 600;
+        int segundosValidos = Math.max(TTL_MINIMO_SEGUNDOS, ttl - MARGEM_SEGURANCA_SEGUNDOS);
+        cachedToken = new CachedToken(token, Instant.now().plusSeconds(segundosValidos));
+
+        log.info("Token obtido e armazenado em cache por ~{}s — scope solicitado: {}, scope concedido: {}",
+                segundosValidos, properties.getScope(), token.scope());
+        return token;
     }
 
     private record CachedToken(TokenResponseDTO token, Instant expiraEm) {

@@ -18,7 +18,7 @@ import java.util.Base64;
 @Component
 public class BBOAuthClient extends BBClientSupport {
 
-    public BBOAuthClient(BBApiProperties properties, @Qualifier("bbWebClient") WebClient bbWebClient) {
+    public BBOAuthClient(BBApiProperties properties, @Qualifier("bbOAuthWebClient") WebClient bbWebClient) {
         super(properties, bbWebClient);
     }
 

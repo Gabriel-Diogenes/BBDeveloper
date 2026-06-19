@@ -35,11 +35,10 @@ public class PixApiClient extends BBClientSupport {
         super(properties, properties.isPixRequerMtls() ? bbMtlsWebClient : bbWebClient);
     }
 
-    public PixCobrancaImediataDTO criarCob(String txid, PixCobrancaRequestDTO request, String token) {
+    public PixCobrancaImediataDTO criarCob(String txid, PixCobrancaRequestDTO request) {
         log.info("Criando cobrança Pix (Cob) — txid: {}", txid);
         return bbWebClient.put()
                 .uri(pixUri("/cob/" + txid))
-                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .retrieve()
@@ -49,11 +48,10 @@ public class PixApiClient extends BBClientSupport {
                 .block();
     }
 
-    public PixCobrancaImediataDTO criarCobSemTxid(PixCobrancaRequestDTO request, String token) {
+    public PixCobrancaImediataDTO criarCobSemTxid(PixCobrancaRequestDTO request) {
         log.info("Criando cobrança Pix (Cob) sem txid");
         return bbWebClient.post()
                 .uri(pixUri("/cob"))
-                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .retrieve()
@@ -63,11 +61,10 @@ public class PixApiClient extends BBClientSupport {
                 .block();
     }
 
-    public PixCobrancaImediataDTO consultarCob(String txid, String token) {
+    public PixCobrancaImediataDTO consultarCob(String txid) {
         log.info("Consultando cobrança Pix (Cob) — txid: {}", txid);
         return bbWebClient.get()
                 .uri(pixUri("/cob/" + txid))
-                .header("Authorization", "Bearer " + token)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, errorHandler(API, "consultar cobrança Cob"))
@@ -76,11 +73,10 @@ public class PixApiClient extends BBClientSupport {
                 .block();
     }
 
-    public PixCobrancaImediataDTO revisarCob(String txid, PixCobrancaRequestDTO request, String token) {
+    public PixCobrancaImediataDTO revisarCob(String txid, PixCobrancaRequestDTO request) {
         log.info("Revisando cobrança Pix (Cob) — txid: {}", txid);
         return bbWebClient.patch()
                 .uri(pixUri("/cob/" + txid))
-                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .retrieve()
@@ -91,7 +87,7 @@ public class PixApiClient extends BBClientSupport {
     }
 
     public PixCobListaResponseDTO listarCobs(
-            String token, String inicio, String fim, String cpf, String cnpj, String status,
+            String inicio, String fim, String cpf, String cnpj, String status,
             Integer paginaAtual, Integer itensPorPagina) {
         log.info("Listando cobranças Pix (Cob) — período: {} a {}", inicio, fim);
         String uri = UriComponentsBuilder.fromUriString(pixUri("/cob"))
@@ -107,7 +103,6 @@ public class PixApiClient extends BBClientSupport {
 
         return bbWebClient.get()
                 .uri(uri)
-                .header("Authorization", "Bearer " + token)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, errorHandler(API, "listar cobranças Cob"))
@@ -116,11 +111,10 @@ public class PixApiClient extends BBClientSupport {
                 .block();
     }
 
-    public PixCobvResponseDTO criarCobv(String txid, PixCobvRequestDTO request, String token) {
+    public PixCobvResponseDTO criarCobv(String txid, PixCobvRequestDTO request) {
         log.info("Criando cobrança Pix (CobV) — txid: {}", txid);
         return bbWebClient.put()
                 .uri(pixUri("/cobv/" + txid))
-                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .retrieve()
@@ -130,11 +124,10 @@ public class PixApiClient extends BBClientSupport {
                 .block();
     }
 
-    public PixCobvResponseDTO consultarCobv(String txid, String token) {
+    public PixCobvResponseDTO consultarCobv(String txid) {
         log.info("Consultando cobrança Pix (CobV) — txid: {}", txid);
         return bbWebClient.get()
                 .uri(pixUri("/cobv/" + txid))
-                .header("Authorization", "Bearer " + token)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, errorHandler(API, "consultar cobrança CobV"))
@@ -143,11 +136,10 @@ public class PixApiClient extends BBClientSupport {
                 .block();
     }
 
-    public PixCobvResponseDTO revisarCobv(String txid, PixCobvRequestDTO request, String token) {
+    public PixCobvResponseDTO revisarCobv(String txid, PixCobvRequestDTO request) {
         log.info("Revisando cobrança Pix (CobV) — txid: {}", txid);
         return bbWebClient.patch()
                 .uri(pixUri("/cobv/" + txid))
-                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .retrieve()
@@ -158,7 +150,7 @@ public class PixApiClient extends BBClientSupport {
     }
 
     public PixCobvListaResponseDTO listarCobvs(
-            String token, String inicio, String fim, String cpf, String cnpj, String status,
+            String inicio, String fim, String cpf, String cnpj, String status,
             Integer paginaAtual, Integer itensPorPagina) {
         log.info("Listando cobranças Pix (CobV) — período: {} a {}", inicio, fim);
         String uri = UriComponentsBuilder.fromUriString(pixUri("/cobv"))
@@ -174,7 +166,6 @@ public class PixApiClient extends BBClientSupport {
 
         return bbWebClient.get()
                 .uri(uri)
-                .header("Authorization", "Bearer " + token)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, errorHandler(API, "listar cobranças CobV"))
@@ -184,7 +175,7 @@ public class PixApiClient extends BBClientSupport {
     }
 
     public PixRecebidoListaResponseDTO listarPixRecebidos(
-            String token, String inicio, String fim, String txid, Boolean txIdPresente,
+            String inicio, String fim, String txid, Boolean txIdPresente,
             Boolean devolucaoPresente, String cpf, String cnpj, Integer paginaAtual, Integer itensPorPagina) {
         log.info("Listando Pix recebidos — período: {} a {}", inicio, fim);
         String uri = UriComponentsBuilder.fromUriString(pixUri("/pix"))
@@ -202,7 +193,6 @@ public class PixApiClient extends BBClientSupport {
 
         return bbWebClient.get()
                 .uri(uri)
-                .header("Authorization", "Bearer " + token)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, errorHandler(API, "listar Pix recebidos"))
@@ -211,11 +201,10 @@ public class PixApiClient extends BBClientSupport {
                 .block();
     }
 
-    public PixRecebidoDTO consultarPixRecebido(String e2eid, String token) {
+    public PixRecebidoDTO consultarPixRecebido(String e2eid) {
         log.info("Consultando Pix recebido — e2eid: {}", e2eid);
         return bbWebClient.get()
                 .uri(pixUri("/pix/" + e2eid))
-                .header("Authorization", "Bearer " + token)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, errorHandler(API, "consultar Pix recebido"))
@@ -225,11 +214,10 @@ public class PixApiClient extends BBClientSupport {
     }
 
     public PixDevolucaoDTO solicitarDevolucao(
-            String e2eid, String id, PixDevolucaoRequestDTO request, String token) {
+            String e2eid, String id, PixDevolucaoRequestDTO request) {
         log.info("Solicitando devolução Pix — e2eid: {}, id: {}", e2eid, id);
         return bbWebClient.put()
                 .uri(pixUri("/pix/" + e2eid + "/devolucao/" + id))
-                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .retrieve()
@@ -239,11 +227,10 @@ public class PixApiClient extends BBClientSupport {
                 .block();
     }
 
-    public PixDevolucaoDTO consultarDevolucao(String e2eid, String id, String token) {
+    public PixDevolucaoDTO consultarDevolucao(String e2eid, String id) {
         log.info("Consultando devolução Pix — e2eid: {}, id: {}", e2eid, id);
         return bbWebClient.get()
                 .uri(pixUri("/pix/" + e2eid + "/devolucao/" + id))
-                .header("Authorization", "Bearer " + token)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, errorHandler(API, "consultar devolução Pix"))

@@ -5,15 +5,12 @@ import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.request.Boleto
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.response.BoletoBaixaResponseDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.dto.cobranca.response.BoletoResponseDTO;
 import br.com.intercomex.api_BBDeveloper.BBDeveloper.support.TestFixtures;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -25,27 +22,18 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 class CobrancaServiceTest {
 
     @Mock
     private CobrancaApiClient cobrancaApiClient;
 
-    @Mock
-    private AuthService authService;
-
     @InjectMocks
     private CobrancaService cobrancaService;
-
-    @BeforeEach
-    void configurarToken() {
-        when(authService.gerarToken()).thenReturn(TestFixtures.token());
-    }
 
     @Test
     void registrarBoleto_rejeitaBodyNulo() {
         assertThrows(IllegalArgumentException.class, () -> cobrancaService.registrarBoleto(null));
-        verify(cobrancaApiClient, never()).registrarBoleto(any(), any());
+        verify(cobrancaApiClient, never()).registrarBoleto(any());
     }
 
     @Test
@@ -64,7 +52,7 @@ class CobrancaServiceTest {
         BoletoResponseDTO resposta = new BoletoResponseDTO(
                 "00031285570000000001", null, null, null, null, null, null, null, null, null, null, null);
         ArgumentCaptor<BoletoRegistrarRequestDTO> captor = ArgumentCaptor.forClass(BoletoRegistrarRequestDTO.class);
-        when(cobrancaApiClient.registrarBoleto(eq(TestFixtures.ACCESS_TOKEN), captor.capture()))
+        when(cobrancaApiClient.registrarBoleto(captor.capture()))
                 .thenReturn(resposta);
 
         BoletoResponseDTO resultado = cobrancaService.registrarBoleto(request);
@@ -88,7 +76,7 @@ class CobrancaServiceTest {
                 "00031285570000000001", "", "S",
                 TestFixtures.boletoMinimo().pagador());
         ArgumentCaptor<BoletoRegistrarRequestDTO> captor = ArgumentCaptor.forClass(BoletoRegistrarRequestDTO.class);
-        when(cobrancaApiClient.registrarBoleto(eq(TestFixtures.ACCESS_TOKEN), captor.capture()))
+        when(cobrancaApiClient.registrarBoleto(captor.capture()))
                 .thenReturn(null);
 
         cobrancaService.registrarBoleto(request);
@@ -99,7 +87,7 @@ class CobrancaServiceTest {
     @Test
     void registrarBoletoSimplificado_montaPayloadComPix() {
         ArgumentCaptor<BoletoRegistrarRequestDTO> captor = ArgumentCaptor.forClass(BoletoRegistrarRequestDTO.class);
-        when(cobrancaApiClient.registrarBoleto(eq(TestFixtures.ACCESS_TOKEN), captor.capture()))
+        when(cobrancaApiClient.registrarBoleto(captor.capture()))
                 .thenReturn(null);
 
         cobrancaService.registrarBoletoSimplificado(
@@ -114,13 +102,13 @@ class CobrancaServiceTest {
     @Test
     void cancelarBoleto_usaEndpointBaixarDoBb() {
         BoletoBaixaResponseDTO resposta = new BoletoBaixaResponseDTO("0001", "18.06.2026", "10:00:00", null, null);
-        when(cobrancaApiClient.baixarBoleto(TestFixtures.ACCESS_TOKEN, "00031285570000000001", 3128557))
+        when(cobrancaApiClient.baixarBoleto("00031285570000000001", 3128557))
                 .thenReturn(resposta);
 
         BoletoBaixaResponseDTO resultado = cobrancaService.cancelarBoleto("00031285570000000001", 3128557);
 
         assertEquals(resposta, resultado);
-        verify(cobrancaApiClient).baixarBoleto(TestFixtures.ACCESS_TOKEN, "00031285570000000001", 3128557);
+        verify(cobrancaApiClient).baixarBoleto("00031285570000000001", 3128557);
     }
 
     @Test
@@ -128,7 +116,7 @@ class CobrancaServiceTest {
         ArgumentCaptor<String> agenciaCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> contaCaptor = ArgumentCaptor.forClass(String.class);
         when(cobrancaApiClient.listarBoletos(
-                eq(TestFixtures.ACCESS_TOKEN), eq(3128557),
+                eq(3128557),
                 agenciaCaptor.capture(), contaCaptor.capture(), any(), any()))
                 .thenReturn(null);
 

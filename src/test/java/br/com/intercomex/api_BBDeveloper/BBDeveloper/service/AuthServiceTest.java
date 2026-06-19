@@ -70,4 +70,22 @@ class AuthServiceTest {
 
         assertThrows(IllegalStateException.class, () -> authService.gerarToken());
     }
+
+    @Test
+    void getAccessToken_retornaAccessTokenDoCache() {
+        when(oauthClient.obterToken()).thenReturn(TestFixtures.token(600));
+
+        assertEquals(TestFixtures.ACCESS_TOKEN, authService.getAccessToken());
+    }
+
+    @Test
+    void invalidarToken_forcaNovaChamadaAoOAuth() {
+        when(oauthClient.obterToken()).thenReturn(TestFixtures.token(600));
+
+        authService.gerarToken();
+        authService.invalidarToken();
+        authService.gerarToken();
+
+        verify(oauthClient, times(2)).obterToken();
+    }
 }
