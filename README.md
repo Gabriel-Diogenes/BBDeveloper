@@ -1,4 +1,4 @@
-# BBDeveloper
+# api_bbdeveloper
 
 Proxy **Spring Boot** (Java 17) para as APIs do [Portal BB Developers](https://developers.bb.com.br/): **Pix v2**, **Cobranças v2** e **Extratos v2**. A aplicação centraliza autenticação OAuth2, certificado mTLS e chamadas ao Banco do Brasil, expondo endpoints REST simples para consumo por **Oracle APEX** e outros sistemas internos.
 
@@ -147,8 +147,8 @@ Com perfil explícito:
 
 ```bash
 ./mvnw clean package -DskipTests
-java "-Dspring.profiles.active=homologacao" -jar target/BBDeveloper-0.0.1-SNAPSHOT.jar
-java "-Dspring.profiles.active=producao"    -jar target/BBDeveloper-0.0.1-SNAPSHOT.jar
+java "-Dspring.profiles.active=homologacao" -jar target/api_bbdeveloper-0.0.1-SNAPSHOT.jar
+java "-Dspring.profiles.active=producao"    -jar target/api_bbdeveloper-0.0.1-SNAPSHOT.jar
 ```
 
 ### Verificar ambiente ativo
@@ -268,8 +268,8 @@ Não envie header `Authorization` nas requisições locais — o token é gerado
 Importe a collection e, opcionalmente, um environment:
 
 ```
-postman/BBDeveloper.postman_collection.json
-postman/BBDeveloper.local.postman_environment.json
+postman/api_bbdeveloper.postman_collection.json
+postman/api_bbdeveloper.local.postman_environment.json
 ```
 
 A collection cobre todos os endpoints locais, com variáveis automáticas (`txid`, `numeroBoleto`, `e2eid`, período de listagem Pix, etc.).
@@ -306,19 +306,19 @@ powershell -ExecutionPolicy Bypass -File test-endpoints.ps1
 ./mvnw clean package -DskipTests
 ```
 
-Artefato: `target/BBDeveloper-0.0.1-SNAPSHOT.jar`
+Artefato: `target/api_bbdeveloper-0.0.1-SNAPSHOT.jar`
 
 ### Servidor
 
-1. Copie o JAR para `C:\api\bbdeveloper\`
+1. Copie o JAR para `C:\api\api_bbdeveloper\`
 2. Configure secrets em `config/application-secrets.properties` (modelo em `deploy/config/application-secrets.properties.example`)
 3. Coloque o certificado PFX no caminho indicado nas secrets
-4. Copie `deploy/executa-bbdeveloper.bat` para `C:\api\bbdeveloper\` e execute no servidor
+4. Copie `deploy/executa-api_bbdeveloper.bat` para `C:\api\api_bbdeveloper\` e execute no servidor
 
 Ou manualmente:
 
 ```bash
-java "-Dspring.profiles.active=producao" -jar BBDeveloper-0.0.1-SNAPSHOT.jar
+java "-Dspring.profiles.active=producao" -jar api_bbdeveloper-0.0.1-SNAPSHOT.jar
 ```
 
 Verifique saúde: `GET http://localhost:8080/actuator/health`
@@ -334,7 +334,7 @@ Mesmo padrão dos robôs (`TRACK_CNTR`): logs no console e enviados ao Loki via 
 | `LOKI_VM` | `W7-1` | Label `VM` no Grafana |
 | `LOG_LEVEL` | `INFO` | Nível mínimo enviado ao Loki |
 
-No Grafana, filtre por `application="BBDeveloper"`.
+No Grafana, filtre por `application="api_bbdeveloper"`.
 
 ### Checklist produção
 
@@ -351,7 +351,7 @@ No Grafana, filtre por `application="BBDeveloper"`.
 
 Esta API foi pensada como **backend HTTP** para o APEX:
 
-1. Configure um **Web Source Module** ou **REST Data Source** apontando para a URL do BBDeveloper (ex.: `https://servidor:8080`)
+1. Configure um **Web Source Module** ou **REST Data Source** apontando para a URL do api_bbdeveloper (ex.: `https://servidor:8080`)
 2. **Não** configure OAuth no APEX — a autenticação com o BB é interna
 3. Consuma os endpoints conforme a necessidade (Pix recebidos para conciliação, boletos, extrato, etc.)
 
@@ -395,9 +395,9 @@ Erros do BB são repassados com o status HTTP original (400, 403, 404, 502, etc.
 ## Estrutura do projeto
 
 ```
-bbdeveloper/
-├── src/main/java/.../BBDeveloper/
-│   ├── BbDeveloperApplication.java
+api_bbdeveloper/
+├── src/main/java/.../api_bbdeveloper/
+│   ├── ApiBbdeveloperApplication.java
 │   ├── client/          # PixApiClient, CobrancaApiClient, ExtratoApiClient, BBOAuthClient
 │   ├── config/          # WebClientConfig (plain + mTLS)
 │   ├── controller/      # REST endpoints
@@ -424,4 +424,4 @@ bbdeveloper/
 
 ## Licença
 
-Uso interno — Intercomex / projeto BBDeveloper.
+Uso interno — Intercomex / projeto api_bbdeveloper.

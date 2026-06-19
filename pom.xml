@@ -8,10 +8,10 @@
 		<version>4.0.6</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>br.com.intercomex.api-BBDeveloper</groupId>
-	<artifactId>BBDeveloper</artifactId>
+	<groupId>com.intercomex</groupId>
+	<artifactId>api_bbdeveloper</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>BBDeveloper</name>
+	<name>api_bbdeveloper</name>
 	<description>Proxy API BB Developers</description>
 	<url/>
 	<licenses>
@@ -98,7 +98,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
-					<mainClass>br.com.intercomex.api_BBDeveloper.BBDeveloper.BbDeveloperApplication</mainClass>
+					<mainClass>com.intercomex.api_bbdeveloper.ApiBbdeveloperApplication</mainClass>
 					<excludes>
 						<exclude>
 							<groupId>org.projectlombok</groupId>

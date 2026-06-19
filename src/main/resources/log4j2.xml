@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration packages="pl.tkowalcz.tjahzi.log4j2" shutdownHook="enable">
     <Loggers>
-        <Logger name="br.com.intercomex" level="DEBUG" additivity="false">
+        <Logger name="com.intercomex" level="DEBUG" additivity="false">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="Loki"/>
         </Logger>
@@ -22,8 +22,8 @@
                 <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %class{36}.%-22method : %msg%n</Pattern>
             </PatternLayout>
 
-            <Label name="VM" value="${env:LOKI_VM:-W7-1}"/>
-            <label name="application" value="BBDeveloper"/>
+            <Label name="VM" value="VM:-W10-6"/>
+            <label name="application" value="api_bbdeveloper"/>
 
             <LogLevelLabel>level</LogLevelLabel>
         </Loki>
