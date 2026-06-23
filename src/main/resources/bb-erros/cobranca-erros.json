@@ -1,0 +1,52 @@
+[
+  {
+    "codigo": "4678420.1",
+    "statusHttp": 400,
+    "descricao": "Campo tipo do título preenchido com dados inválidos. Verifique o código da espécie do título (codigoTipoTitulo)."
+  },
+  {
+    "codigo": "4678420",
+    "statusHttp": 400,
+    "descricao": "Campo tipo do título preenchido com dados inválidos. Verifique o código da espécie do título (codigoTipoTitulo)."
+  },
+  {
+    "codigo": "4767157.1",
+    "statusHttp": 400,
+    "descricao": "Número do título cliente já registrado para este convênio. Informe outro número ou consulte o boleto existente."
+  },
+  {
+    "codigo": "4767157",
+    "statusHttp": 400,
+    "descricao": "Número do título cliente já registrado para este convênio. Informe outro número ou consulte o boleto existente."
+  },
+  {
+    "codigo": "4874915.1",
+    "statusHttp": 400,
+    "descricao": "Número do convênio inválido ou não encontrado. Verifique o convênio informado na requisição."
+  },
+  {
+    "codigo": "4874915",
+    "statusHttp": 400,
+    "descricao": "Número do convênio inválido ou não encontrado. Verifique o convênio informado na requisição."
+  },
+  {
+    "codigo": "4929751.1",
+    "statusHttp": 400,
+    "descricao": "Data de vencimento inválida. Verifique o formato (dd.mm.aaaa) e se a data é posterior à emissão."
+  },
+  {
+    "codigo": "4929751",
+    "statusHttp": 400,
+    "descricao": "Data de vencimento inválida. Verifique o formato (dd.mm.aaaa) e se a data é posterior à emissão."
+  },
+  {
+    "codigo": "6646500.1",
+    "statusHttp": 403,
+    "descricao": "Recebemos sua solicitação, mas não é possível prosseguir."
+  },
+  {
+    "codigo": "6646500",
+    "statusHttp": 403,
+    "descricao": "Recebemos sua solicitação, mas não é possível prosseguir."
+  }
+]

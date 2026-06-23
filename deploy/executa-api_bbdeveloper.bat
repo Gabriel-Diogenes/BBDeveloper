@@ -7,7 +7,7 @@ rem Ajuste APP_DIR, PROFILE e JAVA_HOME conforme o ambiente.
 set "APP_DIR=C:\api\api_bbdeveloper"
 set "JAR=api_bbdeveloper-0.0.1-SNAPSHOT.jar"
 set "PROFILE=producao"
-set "PORT=8080"
+set "PORT=8085"
 
 if defined JAVA_HOME (
     set "JAVA_EXE=%JAVA_HOME%\bin\java.exe"

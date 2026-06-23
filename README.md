@@ -25,12 +25,12 @@ Proxy **Spring Boot** (Java 17) para as APIs do [Portal BB Developers](https://d
 
 ## Visão geral
 
-| Item | Descrição |
-|------|-----------|
-| **Stack** | Java 17, Spring Boot 4.0.6, WebClient (Reactor Netty) |
-| **Porta padrão** | `8080` |
+| Item | Descrição                                                                                                                                             |
+|------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Stack** | Java 17, Spring Boot 4.0.6, WebClient (Reactor Netty)                                                                                                 |
+| **Porta padrão** | `8085`                                                                                                                                                |
 | **Autenticação local** | Não é necessário enviar `Authorization` — o token OAuth2 é obtido internamente e **reutilizado em cache** (~9 min, margem de 60s antes do vencimento) |
-| **Ambientes** | `homologacao` (padrão) e `producao` |
+| **Ambientes** | `homologacao` (padrão) e `producao`                                                                                                                   |
 | **Escopos OAuth** | `pix.read`, `pix.write`, `cob.read`, `cob.write`, `cobv.read`, `cobv.write`, `cobrancas.boletos-info`, `cobrancas.boletos-requisicao`, `extrato-info` |
 
 ### O que a API faz

@@ -1,0 +1,92 @@
+[
+  {
+    "codigo": "305",
+    "statusHttp": 400,
+    "descricao": "Chave Pix não cadastrada na conta do aplicativo. Verifique se a chave está vinculada à conta no portal BB Developers."
+  },
+  {
+    "codigo": "305.1",
+    "statusHttp": 400,
+    "descricao": "Chave Pix não cadastrada na conta do aplicativo. Verifique se a chave está vinculada à conta no portal BB Developers."
+  },
+  {
+    "codigo": "AcessoNegado",
+    "statusHttp": 403,
+    "descricao": "Acesso negado. A requisição viola alguma regra de autorização ou escopo contratado no portal BB Developers."
+  },
+  {
+    "codigo": "NaoEncontrado",
+    "statusHttp": 404,
+    "descricao": "Entidade não encontrada. Verifique o identificador informado (txid, e2eid ou devolução)."
+  },
+  {
+    "codigo": "CobOperacaoInvalida",
+    "statusHttp": 400,
+    "descricao": "Cobrança Pix imediata inválida. A requisição não respeita o schema ou contém dados semanticamente incorretos."
+  },
+  {
+    "codigo": "CobVOperacaoInvalida",
+    "statusHttp": 400,
+    "descricao": "Cobrança Pix com vencimento inválida. A requisição não respeita o schema ou contém dados semanticamente incorretos."
+  },
+  {
+    "codigo": "CobROperacaoInvalida",
+    "statusHttp": 400,
+    "descricao": "Operação inválida na cobrança recorrente. Verifique status e datas da cobrança."
+  },
+  {
+    "codigo": "LoteCobVOperacaoInvalida",
+    "statusHttp": 400,
+    "descricao": "Lote de cobranças com vencimento inválido. Verifique os dados enviados no lote."
+  },
+  {
+    "codigo": "PixConsultaInvalida",
+    "statusHttp": 400,
+    "descricao": "Parâmetros de consulta de Pix recebidos inválidos. Verifique o período (máximo 5 dias), CPF/CNPJ e paginação."
+  },
+  {
+    "codigo": "PixDevolucaoInvalida",
+    "statusHttp": 400,
+    "descricao": "Devolução Pix inválida. Verifique valor, prazo (até 90 dias) e se o identificador da devolução não foi reutilizado."
+  },
+  {
+    "codigo": "PixNaoEncontrado",
+    "statusHttp": 404,
+    "descricao": "Pix não encontrado para o e2eid informado."
+  },
+  {
+    "codigo": "PixDevolucaoNaoEncontrada",
+    "statusHttp": 404,
+    "descricao": "Devolução Pix não encontrada para o e2eid e id informados."
+  },
+  {
+    "codigo": "WebhookOperacaoInvalida",
+    "statusHttp": 400,
+    "descricao": "Configuração de webhook inválida. Verifique a URL e os dados enviados."
+  },
+  {
+    "codigo": "RecOperacaoInvalida",
+    "statusHttp": 400,
+    "descricao": "Recorrência Pix inválida. A requisição não respeita o schema definido pelo Banco do Brasil."
+  },
+  {
+    "codigo": "SolicRecOperacaoInvalida",
+    "statusHttp": 400,
+    "descricao": "Solicitação de confirmação de recorrência inválida. Verifique os dados do destinatário."
+  },
+  {
+    "codigo": "ServicoIndisponivel",
+    "statusHttp": 503,
+    "descricao": "Serviço Pix temporariamente indisponível. Tente novamente em alguns instantes."
+  },
+  {
+    "codigo": "6646500.1",
+    "statusHttp": 403,
+    "descricao": "Recebemos sua solicitação, mas não é possível prosseguir."
+  },
+  {
+    "codigo": "6646500",
+    "statusHttp": 403,
+    "descricao": "Recebemos sua solicitação, mas não é possível prosseguir."
+  }
+]

@@ -1,0 +1,72 @@
+[
+  {
+    "codigo": "5738445.1",
+    "statusHttp": 400,
+    "descricao": "A data final informada é superior a data atual. Refaça a requisição ajustando a data."
+  },
+  {
+    "codigo": "5746385.1",
+    "statusHttp": 400,
+    "descricao": "Verifique a data inicial e tente novamente. É preciso informar uma data válida."
+  },
+  {
+    "codigo": "5738481.1",
+    "statusHttp": 400,
+    "descricao": "A data inicial informada é superior a data final. Refaça a requisição ajustando as datas."
+  },
+  {
+    "codigo": "5738678.1",
+    "statusHttp": 400,
+    "descricao": "O período entre a data inicial e a data final é superior a 31 dias."
+  },
+  {
+    "codigo": "6668872.1",
+    "statusHttp": 400,
+    "descricao": "A data inicial informada é anterior ao prazo máximo de 5 anos."
+  },
+  {
+    "codigo": "6646500.1",
+    "statusHttp": 403,
+    "descricao": "Recebemos sua solicitação, mas não é possível prosseguir."
+  },
+  {
+    "codigo": "5738445",
+    "statusHttp": 400,
+    "descricao": "A data final informada é superior a data atual. Refaça a requisição ajustando a data."
+  },
+  {
+    "codigo": "5746385",
+    "statusHttp": 400,
+    "descricao": "Verifique a data inicial e tente novamente. É preciso informar uma data válida."
+  },
+  {
+    "codigo": "5738481",
+    "statusHttp": 400,
+    "descricao": "A data inicial informada é superior a data final. Refaça a requisição ajustando as datas."
+  },
+  {
+    "codigo": "5738678",
+    "statusHttp": 400,
+    "descricao": "O período entre a data inicial e a data final é superior a 31 dias."
+  },
+  {
+    "codigo": "6668872",
+    "statusHttp": 400,
+    "descricao": "A data inicial informada é anterior ao prazo máximo de 5 anos."
+  },
+  {
+    "codigo": "6646500",
+    "statusHttp": 403,
+    "descricao": "Recebemos sua solicitação, mas não é possível prosseguir."
+  },
+  {
+    "codigo": "412",
+    "statusHttp": 500,
+    "descricao": "Parâmetros da requisição inválidos (agência, conta ou datas). Verifique os dados informados e tente novamente."
+  },
+  {
+    "codigo": "412.1",
+    "statusHttp": 500,
+    "descricao": "Parâmetros da requisição inválidos (agência, conta ou datas). Verifique os dados informados e tente novamente."
+  }
+]

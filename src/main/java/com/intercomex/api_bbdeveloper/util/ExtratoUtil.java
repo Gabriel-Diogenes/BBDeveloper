@@ -15,10 +15,8 @@ public class ExtratoUtil {
         if (agencia == null || agencia.isBlank()) {
             throw new IllegalArgumentException("Agência é obrigatória.");
         }
+        validarSomenteDigitos(agencia, "Agência");
         String numeros = agencia.replaceAll("\\D", "");
-        if (numeros.isBlank()) {
-            throw new IllegalArgumentException("Agência inválida.");
-        }
         return String.valueOf(Integer.parseInt(numeros));
     }
 
@@ -26,11 +24,20 @@ public class ExtratoUtil {
         if (conta == null || conta.isBlank()) {
             throw new IllegalArgumentException("Conta é obrigatória.");
         }
+        validarSomenteDigitos(conta, "Conta");
         String numeros = conta.replaceAll("\\D", "");
-        if (numeros.isBlank()) {
-            throw new IllegalArgumentException("Conta inválida.");
-        }
         return String.valueOf(Integer.parseInt(numeros));
+    }
+
+    private static void validarSomenteDigitos(String valor, String campo) {
+        if (valor.chars().anyMatch(Character::isLetter)) {
+            throw new IllegalArgumentException(
+                    campo + " inválida. Informe apenas números (pontos, espaços e hífen são permitidos).");
+        }
+        String numeros = valor.replaceAll("\\D", "");
+        if (numeros.isBlank()) {
+            throw new IllegalArgumentException(campo + " inválida. Informe apenas números.");
+        }
     }
 
     /**

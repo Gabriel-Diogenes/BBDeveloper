@@ -21,6 +21,14 @@ class ExtratoUtilTest {
     }
 
     @Test
+    void formatarConta_rejeitaLetras() {
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> ExtratoUtil.formatarConta("1505 43trgfbbdcb"));
+
+        assertTrue(ex.getMessage().contains("Conta inválida"));
+    }
+
+    @Test
     void formatarConta_removeDigitosNaoNumericos() {
         assertEquals("123873", ExtratoUtil.formatarConta("123.873"));
     }
