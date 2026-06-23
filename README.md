@@ -57,7 +57,7 @@ Cliente (APEX / Postman / outro)
         │                              ├── bbWebClient (HTTP)
         │                              └── bbMtlsWebClient (mTLS: Pix produção, Extrato)
         ▼
- GlobalExceptionHandler
+ GlobalExceptionHandler  ──►  BBErrorResolver (catálogo bb-erros/*.json)
 ```
 
 | Camada | Responsabilidade |
@@ -67,6 +67,7 @@ Cliente (APEX / Postman / outro)
 | `client` | Chamadas HTTP ao BB (`PixApiClient`, `CobrancaApiClient`, `ExtratoApiClient`, `BBOAuthClient`) |
 | `dto` | Contratos de request/response (espelham APIs BB/BACEN) |
 | `properties` | URLs, credenciais e flags por perfil (`BBApiProperties`, `BBCredentials`) |
+| `exception/bb` | Catálogos de erros BB, parser da resposta e resolução para mensagens ao ERP |
 
 ---
 
@@ -130,11 +131,13 @@ git config core.hooksPath .githooks
 
 ## Execução
 
-### Desenvolvimento (Maven)
+### Desenvolvimento (Maven / IntelliJ)
 
 ```bash
 ./mvnw spring-boot:run
 ```
+
+A aplicação sobe na porta **8085** (`server.port` em `application.properties`). No IntelliJ, execute a classe principal sem sobrescrever a porta em *VM options* (evite `-Dserver.port=8080`).
 
 Com perfil explícito:
 
@@ -154,7 +157,7 @@ java "-Dspring.profiles.active=producao"    -jar target/api_bbdeveloper-0.0.1-SN
 ### Verificar ambiente ativo
 
 ```http
-GET http://localhost:8080/ambiente
+GET http://localhost:8085/ambiente
 ```
 
 Retorna perfil, URLs das APIs BB, se mTLS está habilitado para Pix e se o header de homologação do extrato está configurado.
@@ -176,7 +179,7 @@ Retorna perfil, URLs das APIs BB, se mTLS está habilitado para Pix e se o heade
 
 Arquivos de perfil:
 
-- `application.properties` — configuração pública e import de secrets
+- `application.properties` — porta (`8085`), configuração pública e import de secrets
 - `application-homologacao.properties`
 - `application-producao.properties`
 - `application-secrets.properties` — credenciais (local, gitignored)
@@ -185,7 +188,7 @@ Arquivos de perfil:
 
 ## Endpoints
 
-Base URL local: `http://localhost:8080`
+Base URL local: `http://localhost:8085`
 
 Não envie header `Authorization` nas requisições locais — o token é gerado internamente.
 
@@ -256,8 +259,11 @@ Não envie header `Authorization` nas requisições locais — o token é gerado
 |--------|------------|--------|
 | `GET` | `/extrato` | `GET /conta-corrente/agencia/{agencia}/conta/{conta}` |
 
-**Query obrigatórios:** `agencia`, `conta`, `dataInicio`, `dataFim` (formato `dd.MM.yyyy`)  
+**Query obrigatórios:** `agencia`, `conta`, `dataInicio`, `dataFim`  
+**Formatos de data aceitos:** `dd.MM.yyyy`, `dd/MM/yyyy`, `yyyy-MM-dd` ou `DDMMAAAA` (convertidos internamente para o padrão BB)  
 **Query opcionais:** `pagina`, `quantidadePorPagina` (BB: mín. 30, máx. 120; omitir = 120)
+
+Agência e conta devem conter apenas números (pontos, espaços e hífen são aceitos como separadores; letras são rejeitadas antes da chamada ao BB).
 
 **Homologação (massa de teste BB):** agência `1505`, conta `1348`, datas `19.04.2023` a `23.04.2023`.
 
@@ -313,7 +319,7 @@ Artefato: `target/api_bbdeveloper-0.0.1-SNAPSHOT.jar`
 1. Copie o JAR para `C:\api\api_bbdeveloper\`
 2. Configure secrets em `config/application-secrets.properties` (modelo em `deploy/config/application-secrets.properties.example`)
 3. Coloque o certificado PFX no caminho indicado nas secrets
-4. Copie `deploy/executa-api_bbdeveloper.bat` para `C:\api\api_bbdeveloper\` e execute no servidor
+4. Copie `deploy/executa-api_bbdeveloper.bat` para `C:\api\api_bbdeveloper\` e execute no servidor (o script usa a porta **8085** para parar/iniciar)
 
 Ou manualmente:
 
@@ -321,7 +327,7 @@ Ou manualmente:
 java "-Dspring.profiles.active=producao" -jar api_bbdeveloper-0.0.1-SNAPSHOT.jar
 ```
 
-Verifique saúde: `GET http://localhost:8080/actuator/health`
+Verifique saúde: `GET http://localhost:8085/actuator/health`
 
 ### Logs (Log4j2 + Grafana Loki)
 
@@ -351,7 +357,7 @@ No Grafana, filtre por `application="api_bbdeveloper"`.
 
 Esta API foi pensada como **backend HTTP** para o APEX:
 
-1. Configure um **Web Source Module** ou **REST Data Source** apontando para a URL do api_bbdeveloper (ex.: `https://servidor:8080`)
+1. Configure um **Web Source Module** ou **REST Data Source** apontando para a URL do api_bbdeveloper (ex.: `http://servidor:8085` ou a porta NAT externa configurada no firewall)
 2. **Não** configure OAuth no APEX — a autenticação com o BB é interna
 3. Consuma os endpoints conforme a necessidade (Pix recebidos para conciliação, boletos, extrato, etc.)
 
@@ -368,12 +374,54 @@ Para conciliação sem webhook, use:
 
 ## Tratamento de erros
 
-| Situação | HTTP | Corpo |
-|----------|------|-------|
-| Parâmetro inválido (txid, e2eid, período) | `400` | `{"erro":"mensagem"}` |
-| Erro retornado pelo BB | mesmo status do BB | `{"erro":"Erro na API do Banco do Brasil","api":"...","operacao":"...","statusHttp":...,"respostaBb":"..."}` |
+Respostas de erro seguem um padrão único para facilitar a exibição no ERP:
 
-Erros do BB são repassados com o status HTTP original (400, 403, 404, 502, etc.) e o body bruto em `respostaBb` para diagnóstico.
+```json
+{
+  "erro": "5738445.1",
+  "descricao": "A data final informada é superior a data atual. Refaça a requisição ajustando a data."
+}
+```
+
+| Situação | HTTP | Campo `erro` | Campo `descricao` |
+|----------|------|--------------|-------------------|
+| Validação local (txid, e2eid, data, agência, conta, etc.) | `400` | `VALIDACAO` | Mensagem explicativa da validação |
+| Erro conhecido do BB (código no catálogo) | mesmo status do BB | Código BB (ex.: `5738445.1`, `4678420`, `AcessoNegado`) | Descrição amigável do catálogo |
+| Erro do BB sem entrada no catálogo | mesmo status do BB | Código extraído da resposta ou `DESCONHECIDO` | Mensagem padrão de erro desconhecido |
+
+O status HTTP original do Banco do Brasil (400, 403, 404, 500, 502, etc.) é **sempre repassado** na resposta.
+
+### Catálogos de erros
+
+Os códigos e descrições ficam em arquivos JSON por API (editáveis sem recompilar):
+
+| Arquivo | API |
+|---------|-----|
+| `src/main/resources/bb-erros/extrato-erros.json` | Extrato |
+| `src/main/resources/bb-erros/cobranca-erros.json` | Cobrança |
+| `src/main/resources/bb-erros/pix-erros.json` | Pix |
+
+Fluxo: ao receber erro do BB, a API extrai o código do body (`erros[].codigo`, `errorCode`, `subErrorCode` ou tipo RFC 7807 no Pix), consulta o catálogo correspondente e retorna `erro` + `descricao`. Novos códigos podem ser incluídos nos JSONs conforme a documentação do portal BB Developers.
+
+### Exemplos
+
+Validação de data inválida (antes de chamar o BB):
+
+```json
+{
+  "erro": "VALIDACAO",
+  "descricao": "Data inválida: '10.06.2026fd'. Use dd.MM.yyyy, dd/MM/yyyy, yyyy-MM-dd ou DDMMAAAA."
+}
+```
+
+Erro de extrato retornado pelo BB:
+
+```json
+{
+  "erro": "5738678.1",
+  "descricao": "O período entre a data inicial e a data final é superior a 31 dias."
+}
+```
 
 ---
 
@@ -402,7 +450,7 @@ api_bbdeveloper/
 │   ├── config/          # WebClientConfig (plain + mTLS)
 │   ├── controller/      # REST endpoints
 │   ├── dto/             # Request/response por domínio (pix, cobranca, extrato, auth)
-│   ├── exception/       # BBApiException, GlobalExceptionHandler
+│   ├── exception/       # BBApiException, GlobalExceptionHandler, catálogo bb/ (BBErrorCatalog, BBErrorResolver)
 │   ├── properties/      # BBApiProperties, BBCredentials
 │   ├── service/         # Lógica de negócio
 │   └── util/            # PixUtil, ExtratoUtil
@@ -411,6 +459,7 @@ api_bbdeveloper/
 │   ├── application-homologacao.properties
 │   ├── application-producao.properties
 │   ├── application-secrets.properties.example
+│   ├── bb-erros/        # Catálogos de código/descrição (extrato, cobranca, pix)
 │   └── certificados/    # PFX (gitignored)
 ├── postman/             # Collection e environments
 ├── scripts/             # setup-secrets.ps1
